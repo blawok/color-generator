@@ -22,7 +22,7 @@ def run_experiment(experiment_config: Dict, save_weights: bool, gpu_ind: int):
         {
             "datasets": "ColorsDataset",
             "model": "ColorModel",
-            "network": "ditilbert",
+            "network": "distilbert",
             "train_args": {
                 "batch_size": 32,
                 "epochs": 2
@@ -36,11 +36,11 @@ def run_experiment(experiment_config: Dict, save_weights: bool, gpu_ind: int):
     print(f"Running experiment with config {experiment_config} on GPU {gpu_ind}")
 
     datasets_module = importlib.import_module("color_generator.datasets")
-    dataset_class_ = getattr(datasets_module, experiment_config["datasets"])
+    dataset_class_ = getattr(datasets_module, experiment_config["dataset"])
     dataset_args = experiment_config.get("dataset_args", {})
     dataset = dataset_class_(**dataset_args)
     dataset.load_or_generate_data()
-    print(dataset)
+    # print(dataset)
 
     models_module = importlib.import_module("color_generator.models")
     model_class_ = getattr(models_module, experiment_config["model"])
@@ -62,11 +62,11 @@ def run_experiment(experiment_config: Dict, save_weights: bool, gpu_ind: int):
 
     train_model(
         model,
-        dataset,
+        dataset.train,
         epochs=experiment_config["train_args"]["epochs"],
         batch_size=experiment_config["train_args"]["batch_size"],
     )
-    score = model.evaluate(dataset.x_test, dataset.y_test)
+    score = model.evaluate(dataset.test)
     print(f"Test evaluation: {score}")
 
     if save_weights:

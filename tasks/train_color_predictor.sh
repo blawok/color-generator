@@ -1,2 +1,2 @@
 #!/bin/bash
-python training/run_experiment.py --save '{"dataset": "ColorDataset", "model": "ColorModel", "network": "distilbert"}'
+PYTHONPATH='.' pipenv run python3 training/run_experiment.py --save '{"dataset": "ColorsDataset", "model": "ColorModel", "network": "distilbert"}'

@@ -7,8 +7,8 @@ from datasets import load_dataset
 from transformers import DistilBertTokenizer
 
 
-RAW_DATA_DIRNAME = Dataset.data_dirname() / "raw" / "colors.csv"
-
+# RAW_DATA_DIRNAME = Dataset.data_dirname() / "raw" / "colors.csv"
+RAW_DATA_DIRNAME = 'data/raw/colors.csv'
 
 class ColorsDataset(Dataset):
 
@@ -20,7 +20,6 @@ class ColorsDataset(Dataset):
     def load_or_generate_data(self):
         """Generate preprocessed data from a file"""
         self.train, self.test = _load_and_process_colors(self.test_size)
-
 
 
 def _load_and_process_colors(test_size=0.15):

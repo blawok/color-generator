@@ -4,7 +4,7 @@ import numpy as np
 
 from color_generator.models.base import Model
 from color_generator.datasets.colors_dataset import ColorsDataset
-from color_generator.networks.distilbert import mlp
+from color_generator.networks.distilbert import distilbert
 
 from transformers import DistilBertTokenizer
 from tensorflow import convert_to_tensor
@@ -16,7 +16,7 @@ class ColorModel(Model):
     def __init__(
         self,
         dataset_cls: type = ColorsDataset,
-        network_fn: Callable = mlp,
+        network_fn: Callable = distilbert,
         dataset_args: Dict = None,
         network_args: Dict = None,
     ):

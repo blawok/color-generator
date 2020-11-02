@@ -1,8 +1,6 @@
 """ColorPredictor class"""
 from typing import Tuple, Union
 
-import numpy as np
-
 from color_generator.models import ColorModel
 
 
@@ -13,7 +11,7 @@ class ColorPredictor:
         self.model = ColorModel()
         self.model.load_weights()
 
-    def predict(self, input_text: Union[np.ndarray, str]) -> Tuple[str, float]:
+    def predict(self, input_text):
         """Predict on a single text."""
         return self.model.predict_on_text(input_text)
 

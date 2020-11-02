@@ -1,0 +1,21 @@
+[[source]]
+name = "pypi"
+url = "https://pypi.org/simple"
+verify_ssl = true
+
+[dev-packages]
+
+[packages]
+datasets = "*"
+transformers = "*"
+tensorflow = "*"
+boltons = "*"
+editdistance = "*"
+h5py = "*"
+numpy = "*"
+requests = "*"
+toml = "*"
+Flask = "*"
+
+[requires]
+python_version = "3.8"

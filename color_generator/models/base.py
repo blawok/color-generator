@@ -28,7 +28,7 @@ class Model:
 
         if network_args is None:
             network_args = {}
-        self.network = network_fn(self.data.input_shape, self.data.output_shape, **network_args)
+        self.network = network_fn(**network_args)
         self.network.summary()
 
     @property
@@ -66,3 +66,6 @@ class Model:
 
     def save_weights(self):
         self.network.save_weights(self.weights_filename)
+
+    def evaluate(self, dataset):
+        return self.network.evaluate(dataset)
