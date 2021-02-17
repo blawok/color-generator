@@ -1,21 +1,15 @@
 [[source]]
-name = "pypi"
 url = "https://pypi.org/simple"
 verify_ssl = true
-
-[dev-packages]
+name = "pypi"
 
 [packages]
-datasets = "*"
+torch = "*"
 transformers = "*"
-tensorflow = "*"
-boltons = "*"
-editdistance = "*"
-h5py = "*"
-numpy = "*"
-requests = "*"
-toml = "*"
-Flask = "*"
+pathlib = "*"
+
+[dev-packages]
+ipython = "*"
 
 [requires]
 python_version = "3.8"
