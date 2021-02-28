@@ -18,9 +18,27 @@ class DefaultDataset(Dataset):
 def _parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "--subsample_fraction",
+        "--test_size",
         type=float,
-        default=None,
-        help="If given, is used as the fraction of data to expose.",
+        default=0.15,
+        help="If given, is used as the fraction of data to test on.",
+    )
+    parser.add_argument(
+        "--val_size",
+        type=float,
+        default=0.10,
+        help="If given, is used as the fraction of data to validate on.",
+    )
+    parser.add_argument(
+        "--batch_size",
+        type=int,
+        default=64,
+        help="If given, is used as the batch size.",
+    )
+    parser.add_argument(
+        "--num_workers",
+        type=int,
+        default=4,
+        help="If given, is used as the number of workers to use.",
     )
     return parser.parse_args()
