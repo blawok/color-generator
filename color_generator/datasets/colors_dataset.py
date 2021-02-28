@@ -1,81 +1,128 @@
-from color_generator.datasets.dataset import _download_raw_dataset, Dataset, _parse_args
-from pathlib import Path
 import numpy as np
-
-import tensorflow as tf
-from datasets import load_dataset
+import pandas as pd
+from color_generator.datasets.dataset import DefaultDataset, _parse_args
+import torch
+from torch.utils.data.sampler import SubsetRandomSampler
+from torch.utils.data import Subset, DataLoader
 from transformers import DistilBertTokenizer
 
 
-# RAW_DATA_DIRNAME = Dataset.data_dirname() / "raw" / "colors.csv"
-RAW_DATA_DIRNAME = 'data/raw/colors.csv'
-
-class ColorsDataset(Dataset):
-
-    def __init__(self, test_size=0.15):
+class ColorsDataset(DefaultDataset):
+    def __init__(self, test_size, val_size, batch_size, num_workers):
         self.test_size = test_size
+        self.val_size = val_size
+        self.batch_size = batch_size
+        self.num_workers = num_workers
         self.train = None
         self.test = None
+        self.val = None
+        self._tokenizer = None
+        self._inputs = None
+        self._targets = None
 
-    def load_or_generate_data(self):
+    def load_and_generate_data(self):
         """Generate preprocessed data from a file"""
-        self.train, self.test = _load_and_process_colors(self.test_size)
+        self._tokenizer, self._inputs, self._targets = _load_and_process_colors()
+
+    def __getitem__(self, index):
+        """Get item"""
+        item = {
+            k: torch.tensor(v)
+            for k, v in self._tokenizer(
+                self._inputs[index], truncation=True, max_length=32
+            ).items()
+        }
+        item["target"] = torch.tensor(_norm(self._targets[index]))
+        return item
+
+    def __len__(self):
+        return len(self._inputs)
 
 
-def _load_and_process_colors(test_size=0.15):
-    """
-    Preprocess dataset file:
-        1. Load Tokenizer from hub
-        2. Tokenize dataset in 1000 (dafault) batches
-        3. Transform into tensorflow tensors
-        4. Extract features
-        5. Transform into tf.data.Dataset
-
-    Returns: tf.data.Dataset
-    """
-    tokenizer = DistilBertTokenizer.from_pretrained('distilbert-base-uncased')
-
-    dataset = load_dataset('csv', data_files=RAW_DATA_DIRNAME)
-    train_test_dataset = dataset['train'].train_test_split(test_size=test_size)
-    encoded_dataset = train_test_dataset.map(lambda examples: tokenizer(examples['name'], max_length=32), batched=True)
-
-    # features
-    encoded_dataset.set_format(type='tensorflow', columns=['input_ids', 'attention_mask'])
-    train_features = {x: encoded_dataset['train'][x].to_tensor(default_value=0, shape=[None, 32]) for x in
-                      ['input_ids', 'attention_mask']}
-    test_features = {x: encoded_dataset['test'][x].to_tensor(default_value=0, shape=[None, 32]) for x in
-                     ['input_ids', 'attention_mask']}
-
-    # labels
-    encoded_dataset.set_format(type='numpy', columns=['red', 'green', 'blue'])
-    train_labels = np.column_stack([_norm(encoded_dataset['train'][:]['red']),
-                                    _norm(encoded_dataset['train'][:]['green']),
-                                    _norm(encoded_dataset['train'][:]['blue'])])
-
-    test_labels = np.column_stack([_norm(encoded_dataset['test'][:]['red']),
-                                   _norm(encoded_dataset['test'][:]['green']),
-                                   _norm(encoded_dataset['test'][:]['blue'])])
-
-    train_tfdataset = tf.data.Dataset.from_tensor_slices((train_features, train_labels
-                                                          )).batch(32)
-
-    test_tfdataset = tf.data.Dataset.from_tensor_slices((test_features, test_labels
-                                                         )).batch(32)
-
-    return train_tfdataset, test_tfdataset
+def _norm(rgb_list):
+    return [value / 255.0 for value in rgb_list]
 
 
-def _norm(value):
-    return value / 255.0
+def _load_and_process_colors():
+    def rgb_to_list(x):
+        return [x["red"], x["green"], x["blue"]]
+
+    path_to_data = ColorsDataset.data_dirname() / "raw/colors.csv"
+    dataset = pd.read_csv(path_to_data)
+
+    tokenizer = DistilBertTokenizer.from_pretrained("distilbert-base-uncased")
+    names = dataset["name"].tolist()
+    rgb = dataset.apply(rgb_to_list, axis=1).tolist()
+
+    return tokenizer, names, rgb
 
 
 def main():
-    """Load and preprocess colors datasets and print info."""
+    """
+    Load and preprocess colors.
+    Make dataloaders.
+    """
     args = _parse_args()
-    dataset = ColorsDataset()
-    dataset.load_or_generate_data()
 
-    print(dataset)
+    # dataset
+    dataset = ColorsDataset(
+        test_size=args.test_size,
+        val_size=args.val_size,
+        batch_size=args.batch_size,
+        num_workers=args.num_workers,
+    )
+    dataset.load_and_generate_data()
+
+    # split indices: train, val and test set
+    indexes = list(range(len(dataset)))
+    split_point = int(
+        np.floor((1 - (dataset.val_size + dataset.test_size)) * len(dataset))
+    )
+    np.random.seed(2137)
+    np.random.shuffle(indexes)
+    train_indexes, rest_indexes = indexes[:split_point], indexes[split_point:]
+    val_test_split_point = int(
+        np.floor(
+            (dataset.val_size / (dataset.val_size + dataset.test_size))
+            * len(rest_indexes)
+        )
+    )
+    valid_indexes, test_indexes = (
+        rest_indexes[:val_test_split_point],
+        rest_indexes[val_test_split_point:],
+    )
+
+    # make dataset samplers
+    train_sampler = SubsetRandomSampler(train_indexes)
+    valid_sampler = SubsetRandomSampler(valid_indexes)
+    test_sampler = SubsetRandomSampler(test_indexes)
+
+    # datasets: train, valid and test
+    train_dataset = Subset(dataset=dataset, indices=train_sampler.indices)
+    valid_dataset = Subset(dataset=dataset, indices=valid_sampler.indices)
+    test_dataset = Subset(dataset=dataset, indices=test_sampler.indices)
+
+    # dataloaders
+    train_loader = DataLoader(
+        dataset=train_dataset,
+        batch_size=dataset.batch_size,
+        shuffle=True,
+        num_workers=dataset.num_workers,
+    )
+    valid_loader = DataLoader(
+        dataset=valid_dataset,
+        batch_size=dataset.batch_size,
+        shuffle=True,
+        num_workers=dataset.num_workers,
+    )
+    test_loader = DataLoader(
+        dataset=test_dataset,
+        batch_size=dataset.batch_size,
+        shuffle=False,
+        num_workers=dataset.num_workers,
+    )
+
+    return train_loader, valid_loader, test_loader
 
 
 if __name__ == "__main__":
