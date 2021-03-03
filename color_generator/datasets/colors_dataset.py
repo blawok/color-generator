@@ -1,9 +1,9 @@
 import numpy as np
 import pandas as pd
-from color_generator.datasets.dataset import DefaultDataset, _parse_args
 import torch
+from color_generator.datasets.dataset import DefaultDataset, _parse_args
+from torch.utils.data import DataLoader, Subset
 from torch.utils.data.sampler import SubsetRandomSampler
-from torch.utils.data import Subset, DataLoader
 from transformers import DistilBertTokenizer
 
 
@@ -16,31 +16,29 @@ class ColorsDataset(DefaultDataset):
         self.train = None
         self.test = None
         self.val = None
-        self._tokenizer = None
+        self._color_names = None
         self._inputs = None
         self._targets = None
 
     def load_and_generate_data(self):
         """Generate preprocessed data from a file"""
-        self._tokenizer, self._inputs, self._targets = _load_and_process_colors()
+        self._color_names, self._inputs, self._targets = _load_and_process_colors()
 
     def __getitem__(self, index):
         """Get item"""
-        item = {
-            k: torch.tensor(v)
-            for k, v in self._tokenizer(
-                self._inputs[index], truncation=True, max_length=32
-            ).items()
-        }
-        item["target"] = torch.tensor(_norm(self._targets[index]))
+        item = dict.fromkeys(self._inputs, {})
+        item["input_ids"] = self._inputs["input_ids"][index]
+        item["attention_mask"] = self._inputs["attention_mask"][index]
+        item["target"] = _norm(self._targets[index])
+
         return item
 
     def __len__(self):
-        return len(self._inputs)
+        return len(self._color_names)
 
 
 def _norm(rgb_list):
-    return [value / 255.0 for value in rgb_list]
+    return torch.tensor([value / 255.0 for value in rgb_list])
 
 
 def _load_and_process_colors():
@@ -50,11 +48,12 @@ def _load_and_process_colors():
     path_to_data = ColorsDataset.data_dirname() / "raw/colors.csv"
     dataset = pd.read_csv(path_to_data)
 
-    tokenizer = DistilBertTokenizer.from_pretrained("distilbert-base-uncased")
     names = dataset["name"].tolist()
+    tokenizer = DistilBertTokenizer.from_pretrained("distilbert-base-uncased")
+    tokenized = tokenizer(names, padding=True, return_tensors="pt")
     rgb = dataset.apply(rgb_to_list, axis=1).tolist()
 
-    return tokenizer, names, rgb
+    return names, tokenized, rgb
 
 
 def main():
@@ -62,6 +61,7 @@ def main():
     Load and preprocess colors.
     Make dataloaders.
     """
+
     args = _parse_args()
 
     # dataset
