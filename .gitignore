@@ -6,6 +6,15 @@ __pycache__/
 # C extensions
 *.so
 
+# Model files
+*.h5
+
+# MacOS
+.DS_Store
+
+# idea
+.idea
+
 # Distribution / packaging
 .Python
 build/
