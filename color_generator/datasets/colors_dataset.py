@@ -59,7 +59,6 @@ def _load_and_process_colors():
 def main():
     """
     Load and preprocess colors.
-    Make dataloaders.
     """
 
     args = _parse_args()
@@ -72,57 +71,6 @@ def main():
         num_workers=args.num_workers,
     )
     dataset.load_and_generate_data()
-
-    # split indices: train, val and test set
-    indexes = list(range(len(dataset)))
-    split_point = int(
-        np.floor((1 - (dataset.val_size + dataset.test_size)) * len(dataset))
-    )
-    np.random.seed(2137)
-    np.random.shuffle(indexes)
-    train_indexes, rest_indexes = indexes[:split_point], indexes[split_point:]
-    val_test_split_point = int(
-        np.floor(
-            (dataset.val_size / (dataset.val_size + dataset.test_size))
-            * len(rest_indexes)
-        )
-    )
-    valid_indexes, test_indexes = (
-        rest_indexes[:val_test_split_point],
-        rest_indexes[val_test_split_point:],
-    )
-
-    # make dataset samplers
-    train_sampler = SubsetRandomSampler(train_indexes)
-    valid_sampler = SubsetRandomSampler(valid_indexes)
-    test_sampler = SubsetRandomSampler(test_indexes)
-
-    # datasets: train, valid and test
-    train_dataset = Subset(dataset=dataset, indices=train_sampler.indices)
-    valid_dataset = Subset(dataset=dataset, indices=valid_sampler.indices)
-    test_dataset = Subset(dataset=dataset, indices=test_sampler.indices)
-
-    # dataloaders
-    train_loader = DataLoader(
-        dataset=train_dataset,
-        batch_size=dataset.batch_size,
-        shuffle=True,
-        num_workers=dataset.num_workers,
-    )
-    valid_loader = DataLoader(
-        dataset=valid_dataset,
-        batch_size=dataset.batch_size,
-        shuffle=True,
-        num_workers=dataset.num_workers,
-    )
-    test_loader = DataLoader(
-        dataset=test_dataset,
-        batch_size=dataset.batch_size,
-        shuffle=False,
-        num_workers=dataset.num_workers,
-    )
-
-    return train_loader, valid_loader, test_loader
 
 
 if __name__ == "__main__":
