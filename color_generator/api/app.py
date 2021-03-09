@@ -1,35 +1,55 @@
 #!/usr/bin/env python3
 
 import os
-
 from flask import Flask, request, jsonify
-
 from color_generator.models.color_model import ColorModel
 
 app = Flask(__name__)
+port = int(os.environ.get("PORT", 5000))
+
+
+def plot_rgb(rgb):
+    # data = [[rgb]]
+    plt.figure(figsize=(2,2))
+    plt.imshow(rgb, interpolation='nearest')
+    plt.show()
 
 
 @app.route("/")
 def index():
     """Provide simple health check route."""
-    return "Hello, world!"
+    return "It works!"
 
 
 @app.route("/predict", methods=["GET", "POST"])
 def predict():
-    predictor = ColorModel()
-    predictor.load_weights()
-    input_text = request.form.get('description')
-    pred = predictor.predict_on_text(input_text)
-    print("RGB for desired color is {}".format(pred))
-    answer = "RGB for desired color is {}".format(pred)
+    if request.method == "POST":
+        predictor = ColorModel()
+        predictor.load_weights()
+        input_text = request.form.get('description')
+        pred = predictor.predict_on_text(input_text)
+        print("RGB for desired color is {}".format(pred))
+        answer = "RGB for desired color is {}".format(pred)
+    if request.method == "GET":
+        predictor = ColorModel()
+        predictor.load_weights()
+        pred = predictor.predict_on_text('canary yellow')
+        print(pred)
 
-    return answer
+
+@app.route("/results", methods=["GET", "POST"])
+def print_color():
+    rgb = pred
+    plt.figure(figsize=(2,2))
+    plt.imshow(rgb, interpolation='nearest')
+    plt.show()
+
+    # return
 
 
 def main():
     """Run the app."""
-    app.run(host="0.0.0.0", port=8000, debug=True)  # nosec
+    app.run(host="0.0.0.0", port=port, debug=True)
 
 
 if __name__ == "__main__":
