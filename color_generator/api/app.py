@@ -21,30 +21,14 @@ def index():
     return "It works!"
 
 
-@app.route("/predict", methods=["GET", "POST"])
+@app.route("/show_color", methods=["GET", "POST"])
 def predict():
-    if request.method == "POST":
-        predictor = ColorModel()
-        predictor.load_weights()
-        input_text = request.form.get('description')
-        pred = predictor.predict_on_text(input_text)
-        print("RGB for desired color is {}".format(pred))
-        answer = "RGB for desired color is {}".format(pred)
-    if request.method == "GET":
-        predictor = ColorModel()
-        predictor.load_weights()
-        pred = predictor.predict_on_text('canary yellow')
-        print(pred)
-
-
-@app.route("/results", methods=["GET", "POST"])
-def print_color():
-    rgb = pred
-    plt.figure(figsize=(2,2))
-    plt.imshow(rgb, interpolation='nearest')
-    plt.show()
-
-    # return
+    predictor = ColorModel()
+    predictor.load_weights()
+    input_text = request.form.get('description')
+    pred = predictor.predict_on_text(input_text)
+    print("RGB for desired color is {}".format(pred))
+    answer = "RGB for desired color is {}".format(pred)
 
 
 def main():
