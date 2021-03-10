@@ -3,7 +3,7 @@ from torch.utils.data import DataLoader, Subset
 from torch.utils.data.sampler import SubsetRandomSampler
 
 
-class ColorsDataLoaders:
+class DataLoaders:
     def __init__(self, dataset):
 
         self._dataset = dataset
