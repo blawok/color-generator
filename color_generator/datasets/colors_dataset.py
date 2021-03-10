@@ -1,14 +1,11 @@
-import numpy as np
 import pandas as pd
 import torch
 from color_generator.datasets.dataset import DefaultDataset, _parse_args
-from torch.utils.data import DataLoader, Subset
-from torch.utils.data.sampler import SubsetRandomSampler
 from transformers import DistilBertTokenizer
 
 
 class ColorsDataset(DefaultDataset):
-    def __init__(self, test_size, val_size, batch_size, num_workers):
+    def __init__(self, val_size=0.1, test_size=0.15, batch_size=32, num_workers=4):
         self.test_size = test_size
         self.val_size = val_size
         self.batch_size = batch_size
@@ -19,6 +16,8 @@ class ColorsDataset(DefaultDataset):
         self._color_names = None
         self._inputs = None
         self._targets = None
+
+        self.load_and_generate_data()
 
     def load_and_generate_data(self):
         """Generate preprocessed data from a file"""
