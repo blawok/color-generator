@@ -1,0 +1,12 @@
+{
+    "dataset": "ColorsDataset",
+    "model": "ColorModel",
+    "network": "Distilbert",
+    "device": "cpu",
+    "dataset_args": {
+        "batch_size": 16
+    },
+    "train_args": {
+        "epochs": 5
+    }
+}

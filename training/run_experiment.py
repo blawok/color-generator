@@ -5,16 +5,6 @@ import json
 import importlib
 
 
-conf = {
-    "dataset": "ColorsDataset",
-    "model": "ColorModel",
-    "network": "Distilbert",
-    "device": "cpu",
-    "dataset_args": {"batch_size": 1},
-    "train_args": {"epochs": 2},
-}
-
-
 def run_experiment(experiment_config):
     """
     Run a training experiment.
@@ -59,8 +49,8 @@ def run_experiment(experiment_config):
     experiment_config["train_args"] = {**experiment_config.get("train_args", {})}
     model.fit(epochs=experiment_config["train_args"]["epochs"])
 
-    score = model.evaluate()
-    print(f"Test evaluation: {score}")
+    _, score = model.evaluate(model._dataloaders.test_loader)
+    print(f"Test evaluation (cosine similarity): {score:.5f}")
 
 
 def _parse_args():
@@ -69,7 +59,7 @@ def _parse_args():
     parser.add_argument(
         "experiment_config",
         type=str,
-        help='Experimenet JSON (\'{"dataset": "ColorDataset", "model": "ColorModel", "network": "Distilbert"}\'',
+        help='Path to experiment JSON like: \'{"dataset": "ColorDataset", "model": "ColorModel", "network": "Distilbert"}\'',
     )
     args = parser.parse_args()
     return args
@@ -79,7 +69,9 @@ def main():
     """Run experiment."""
     args = _parse_args()
 
-    experiment_config = json.loads(args.experiment_config)
+    with open(args.experiment_config, "r") as f:
+        config = f.read()
+    experiment_config = json.loads(config)
     run_experiment(experiment_config)
 
 
