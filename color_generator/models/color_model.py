@@ -18,7 +18,7 @@ class ColorModel(Model):
     def predict_on_text(self, input_text):
         tokenizer = DistilBertTokenizer.from_pretrained("distilbert-base-uncased")
         input_text = tokenizer(input_text, truncation=True, return_tensors="pt")
-        # self.load_weights(early_stopping=False)
+        self.load_weights()
         self.network.eval()
         predictions = (
             (self.network(input_text["input_ids"], input_text["attention_mask"]))
@@ -26,5 +26,8 @@ class ColorModel(Model):
             .tolist()
         )
 
-        return predictions
+        return self._unnorm(predictions)
 
+    @staticmethod
+    def _unnorm(predictions):
+        return [int(x) for x in predictions * 255]

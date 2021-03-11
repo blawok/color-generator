@@ -15,6 +15,6 @@ class ColorPredictor:
         """Predict on a single text."""
         return self.model.predict_on_text(input_text)
 
-    def evaluate(self, dataset):
+    def evaluate(self):
         """Evaluate on a datasets."""
-        return self.model.evaluate(dataset)
+        return self.model.evaluate(self.model._dataloaders.test_loader)
