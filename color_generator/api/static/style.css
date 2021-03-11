@@ -29,7 +29,7 @@ body {
     font-family: $font-family;
     font-size: $font-size;
     background-size: 200% 100% !important;
-    animation: move 10s ease infinite;
+    animation: move 20s ease infinite;
     transform: translate3d(0, 0, 0);
 
     height: 100vh
@@ -53,6 +53,14 @@ body {
     font-size: $font-size;
     margin-bottom: -10px;
     font-weight: 500;
+    color: white;
+}
+
+.user__subtitle {
+    text-align: center;
+    font-size: $font-size;
+    margin-bottom: -10px;
+    font-weight: 200;
     color: white;
 }
 

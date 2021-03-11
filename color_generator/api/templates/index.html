@@ -25,7 +25,9 @@
 
         <form class="form" method="POST">
             <div class="form__group">
-                <input type="text" name="color_desc" placeholder="E.g. {{ example_color }}" class="form__input" />
+                <input type="text" name="color_desc" placeholder="E.g. {{ example_color }}" class="form__input"
+                       required="" oninvalid="this.setCustomValidity('No description, no color!')"
+                       oninput="setCustomValidity('')"/>
             </div>
 
             <button class="btn" name="submit_col" type="submit">Show it to me!</button>
