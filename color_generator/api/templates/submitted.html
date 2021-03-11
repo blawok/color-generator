@@ -20,17 +20,17 @@
 
     <div class="user">
         <header class="user__header">
-            <h1 class="user__title">Describe a color and see how it looks!</h1>
+            <h1 class="user__title">That's your color in a background!</h1>
         </header>
-
-        <form class="form" method="POST">
+        <form class="form">
             <div class="form__group">
-                <input type="text" name="color_desc" placeholder="E.g. {{ example_color }}" class="form__input" />
+                <input onclick="this.select();" type="text" class="form__input" value="{{ color }}" readonly/>
             </div>
-
-            <button class="btn" name="submit_col" type="submit">Show it to me!</button>
+            <br>
+            <button class="btn" formaction="http://localhost:5000/show_color">Let me see different color!</button>
         </form>
     </div>
+
 </div>
 
 <!-- Footer -->
@@ -41,5 +41,6 @@
   <p>Powered by <a target="_blank" class="w3-hover-text-green">Netbotic</a></p>
 </footer>
 
+<script src="../static/script.js"></script>
 </body>
 </html>
