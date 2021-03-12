@@ -1,14 +1,11 @@
-
-
-$color-primary: #ABA194;
-
 page-container {
   position: relative;
   min-height: 100vh;
 }
 
 content-wrap {
-  padding-bottom: 2.5rem;    /* Footer height */
+  padding-bottom: 2.5rem;
+  /* Footer height */
 }
 
 footer {
@@ -16,143 +13,130 @@ footer {
   bottom: 0;
   width: 100%;
   text-align: center;
-  height: 2.5rem;            /* Footer height */
+  height: 2.5rem;
+  /* Footer height */
 }
 
 * {
-    margin: 0;
-    padding: 0;
-    box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
 }
 
 body {
-    font-family: $font-family;
-    font-size: $font-size;
-    background-size: 200% 100% !important;
-    animation: move 20s ease infinite;
-    transform: translate3d(0, 0, 0);
-
-    height: 100vh
+  font-family: "RocknRoll One", sans-serif;
+  font-size: 14px;
+  background: linear-gradient(45deg, #598394 5%, #245570 70%);
+  background-size: 200% 100% !important;
+  animation: move 10s ease infinite;
+  transform: translate3d(0, 0, 0);
+  height: 100vh;
 }
 
 .user {
-    width: 90%;
-    max-width: 680px;
-    margin: 10vh auto;
+  width: 90%;
+  max-width: 600px;
+  margin: 10vh auto;
 }
 
 .user__header {
-    text-align: center;
-    opacity: 0;
-    transform: translate3d(0, 500px, 0);
-    animation: arrive 500ms ease-in-out 0.7s forwards;
+  text-align: center;
+  opacity: 0;
+  transform: translate3d(0, 500px, 0);
+  animation: arrive 500ms ease-in-out 0.7s forwards;
 }
 
 .user__title {
-    text-align: center;
-    font-size: $font-size;
-    margin-bottom: -10px;
-    font-weight: 500;
-    color: white;
+  font-size: 35px;
+  margin-bottom: -10px;
+  margin: 0 auto;
+  font-weight: 500;
+  color: white;
 }
 
 .user__subtitle {
-    text-align: center;
-    font-size: $font-size;
-    margin-bottom: -10px;
-    font-weight: 200;
-    color: white;
+  max-width: 450px;
+  font-size: 25px;
+  margin-bottom: -10px;
+  margin: 0 auto;
+  font-weight: 400;
+  color: white;
 }
 
 .form {
-    margin: 0 auto;
-    text-align: center;
-    max-width: 340px;
-    margin-top: 40px;
-    border-radius: 6px;
-    overflow: hidden;
-    opacity: 0;
-    transform: translate3d(0, 500px, 0);
-    animation: arrive 500ms ease-in-out 0.9s forwards;
+  margin: auto;
+  width: 100%;
+  max-width: 340px;
+  margin-top: 40px;
+  border-radius: 6px;
+  overflow: hidden;
+  opacity: 0;
+  transform: translate3d(0, 500px, 0);
+  animation: arrive 500ms ease-in-out 0.9s forwards;
 }
 
 .form--no {
-    animation: NO 1s ease-in-out;
-    opacity: 1;
-    transform: translate3d(0, 0, 0);
+  animation: NO 1s ease-in-out;
+  opacity: 1;
+  transform: translate3d(0, 0, 0);
 }
 
 .form__input {
-    display: block;
-    width: 100%;
-    padding: 20px;
-    font-family: $font-family;
-    -webkit-appearance: none;
-    border: 0;
-    outline: 0;
-    transition: 0.3s;
+  display: block;
+  width: 100%;
+  padding: 20px;
+  font-family: "RocknRoll One", sans-serif;
+  -webkit-appearance: none;
+  border: 0;
+  outline: 0;
+  transition: 0.3s;
+  color: #245570;
+}
 
-    &:focus {
-        background: darken(#fff, 3%);
-    }
+.form__input:focus {
+  background: #f7f7f7;
+}
+
+::placeholder {
+  opacity: 0.6;
 }
 
 .btn {
-    display: block;
-    width: 100%;
-    padding: 20px;
-    font-family: $font-family;
-    -webkit-appearance: none;
-    outline: 0;
-    border: 0;
-    color: white;
-    background: $color-primary;
-    transition: 0.3s;
-
-    &:hover {
-        background: darken($color-primary, 5%);
-    }
+  display: block;
+  width: 100%;
+  padding: 20px;
+  font-family: "RocknRoll One", sans-serif;
+  -webkit-appearance: none;
+  outline: 0;
+  border: 0;
+  color: white;
+  background: #245570;
+  transition: 0.3s;
 }
 
-@keyframes NO {
-  from, to {
-    -webkit-transform: translate3d(0, 0, 0);
-    transform: translate3d(0, 0, 0);
-  }
-
-  10%, 30%, 50%, 70%, 90% {
-    -webkit-transform: translate3d(-10px, 0, 0);
-    transform: translate3d(-10px, 0, 0);
-  }
-
-  20%, 40%, 60%, 80% {
-    -webkit-transform: translate3d(10px, 0, 0);
-    transform: translate3d(10px, 0, 0);
-  }
+.btn:hover {
+  background: #112936;
 }
 
 @keyframes arrive {
-    0% {
-        opacity: 0;
-        transform: translate3d(0, 50px, 0);
-    }
-
-    100% {
-        opacity: 1;
-        transform: translate3d(0, 0, 0);
-    }
+  0% {
+    opacity: 0;
+    transform: translate3d(0, 50px, 0);
+  }
+  100% {
+    opacity: 1;
+    transform: translate3d(0, 0, 0);
+  }
 }
 
 @keyframes move {
-    0% {
-        background-position: 0 0
-    }
-
-    50% {
-        background-position: 100% 0
-    }
-
-    100% {
-        background-position: 0 0
-    }
+  0% {
+    background-position: 0 0;
+  }
+  50% {
+    background-position: 100% 0;
+  }
+  100% {
+    background-position: 0 0;
+  }
 }

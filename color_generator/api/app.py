@@ -25,13 +25,18 @@ def index():
 def send_color():
     if request.method == 'POST':
         color_desc = request.form.get('color_desc')
-        color = predict(color_desc)
-        print ("POST", color_desc, color)
-        return render_template("submitted.html", color=color)
-    print ("GET")
-    color = "rgb(255, 0, 0)"
+        prediction = predict(color_desc)
+        color = pred_to_rgb(prediction)
+        darker_col = darker_color(prediction)
+        hex_code = pred_to_hex(prediction)
+        print (color_desc, color, darker_col)
+        return render_template("submitted.html",
+                               color=color,
+                               darker_col=darker_col,
+                               hex_code=hex_code,
+                               color_desc=color_desc)
     example_color = draw_color()
-    return render_template("index.html", color=color, example_color=example_color)
+    return render_template("index.html", example_color=example_color)
 
 
 def predict(color_desc):
@@ -40,13 +45,28 @@ def predict(color_desc):
     pred = predictor.predict(input_text)
     print(input_text, pred)
     pred = [int(x*255) for x in pred[0]]
-    color = f"rgb({pred[0]}, {pred[1]}, {pred[2]})"
-    return color
+    return pred
 
 
 def draw_color():
     example = random.choice(example_colors)
     return example
+
+
+def pred_to_rgb(pred):
+    color = f"rgb({pred[0]}, {pred[1]}, {pred[2]})"
+    return color
+
+
+def pred_to_hex(pred):
+    hex_code = '#%02x%02x%02x' % (pred[0], pred[1], pred[2])
+    return hex_code
+
+
+def darker_color(pred):
+    color = f"rgb({int(pred[0]*0.90)}, {int(pred[1]*0.90)}, {int(pred[2]*0.90)})"
+    return color
+
 
 
 def main():

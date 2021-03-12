@@ -3,7 +3,7 @@ from typing import Callable, Dict, Tuple
 import numpy as np
 
 from color_generator.models.base import Model
-from color_generator.datasets.colors_dataset import ColorsDataset
+from color_generator.preprocessing.colors_dataset import ColorsDataset
 from color_generator.networks.distilbert import distilbert
 
 from transformers import DistilBertTokenizer

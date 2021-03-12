@@ -1,4 +1,4 @@
-from color_generator.datasets.dataset import _download_raw_dataset, Dataset, _parse_args
+from color_generator.preprocessing.dataset import _download_raw_dataset, Dataset, _parse_args
 from pathlib import Path
 import numpy as np
 

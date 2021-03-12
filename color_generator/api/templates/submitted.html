@@ -3,32 +3,33 @@
 <title>Generate a color!</title>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">
+<!--<link rel="stylesheet" href="https://www.w3schools.com/w3css/4/w3.css">-->
 <link rel="stylesheet" href="../static/style.css">
-<link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Raleway">
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">
+<link rel="preconnect" href="https://fonts.gstatic.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=RocknRoll+One&display=swap">
+<!--<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/4.7.0/css/font-awesome.min.css">-->
 <style>
-    h1 {letter-spacing: 2px}
     body {
-        background: linear-gradient(45deg, #F0FFFF 5%, {{ color }} 60%);
+        background: linear-gradient(45deg, {{ darker_col }} 5%, {{ color }} 60%);
     }
 </style>
 <body>
 
 <!-- !PAGE CONTENT! -->
-<div class="w3-content" style="max-width:1500px">
+<div class="page" style="max-width:2000px">
 
     <div class="user">
         <header class="user__header">
-            <h1 class="user__title">That's your color in a background!</h1>
+            <h1 class="user__title">That's {{ color_desc }} as a background!</h1>
+            <br>
             <h3 class="user__subtitle">You can copy its' values below</h3>
         </header>
         <form class="form">
             <div class="form__group">
                 <input onclick="this.select();" type="text" class="form__input" value="{{ color }}" readonly/>
+                <input onclick="this.select();" type="text" class="form__input" value="{{ hex_code }}" readonly/>
             </div>
-            <br>
-            <button class="btn" formaction="http://localhost:5000/show_color">Let me see different color!</button>
+            <button class="btn" formaction="http://localhost:5000/show_color">Let me see a different color!</button>
         </form>
     </div>
 
