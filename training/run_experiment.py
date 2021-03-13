@@ -35,7 +35,7 @@ def run_experiment(experiment_config: Dict, save_weights: bool, gpu_ind: int):
     """
     print(f"Running experiment with config {experiment_config} on GPU {gpu_ind}")
 
-    datasets_module = importlib.import_module("color_generator.datasets")
+    datasets_module = importlib.import_module("color_generator.preprocessing")
     dataset_class_ = getattr(datasets_module, experiment_config["dataset"])
     dataset_args = experiment_config.get("dataset_args", {})
     dataset = dataset_class_(**dataset_args)

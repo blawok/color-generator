@@ -16,6 +16,8 @@ def distilbert() -> Model:
     config.output_hidden_states = False
     transformer_model = TFDistilBertModel.from_pretrained('distilbert-base-uncased',
                                                           config=config)
+    for layer in transformer_model.layers:
+        layer.trainable = False
 
     qa_embedding = transformer_model(qa, attention_mask=qa_mask)[0]
     cls_encodings = squeeze(qa_embedding[:, 0:1, :], axis=1)

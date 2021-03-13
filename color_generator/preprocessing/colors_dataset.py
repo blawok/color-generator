@@ -26,7 +26,7 @@ def _load_and_process_colors(test_size=0.15):
     """
     Preprocess dataset file:
         1. Load Tokenizer from hub
-        2. Tokenize dataset in 1000 (dafault) batches
+        2. Tokenize dataset in 1000 (default) batches
         3. Transform into tensorflow tensors
         4. Extract features
         5. Transform into tf.data.Dataset

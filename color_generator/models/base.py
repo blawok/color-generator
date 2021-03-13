@@ -59,7 +59,7 @@ class Model:
         return "mse"
 
     def optimizer(self):  # pylint: disable=no-self-use
-        return Adam()
+        return Adam(learning_rate=0.005)
 
     def load_weights(self):
         self.network.load_weights(self.weights_filename)
