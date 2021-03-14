@@ -1,26 +1,27 @@
-"""Define DistilBERT network function."""
-from typing import Tuple
-
-from tensorflow.keras.models import Model
-from tensorflow.keras.layers import Dense, Input
-from tensorflow import squeeze, int32
-from transformers import TFDistilBertModel, DistilBertConfig
+import torch.nn as nn
+from transformers import DistilBertModel, DistilBertConfig
 
 
-def distilbert() -> Model:
+class Distilbert(nn.Module):
+    def __init__(self, transformer_model=DistilBertModel, freeze=True):
+        super(Distilbert, self).__init__()
 
-    qa = Input((32,), dtype=int32)
-    qa_mask = Input((32,), dtype=int32)
+        self.config = DistilBertConfig()
+        self.config.output_hidden_states = False
+        self.config.output_attentions = False
+        self.transformer_model = transformer_model.from_pretrained(
+            "distilbert-base-uncased", config=self.config
+        )
+        self.regression_head = nn.Sequential(
+            nn.Linear(in_features=768, out_features=3), nn.ReLU()
+        )
 
-    config = DistilBertConfig()
-    config.output_hidden_states = False
-    transformer_model = TFDistilBertModel.from_pretrained('distilbert-base-uncased',
-                                                          config=config)
+        if freeze:
+            for param in self.transformer_model.parameters():
+                param.requires_grad = False
 
-    qa_embedding = transformer_model(qa, attention_mask=qa_mask)[0]
-    cls_encodings = squeeze(qa_embedding[:, 0:1, :], axis=1)
-    output_dense = Dense(3, activation='sigmoid')(cls_encodings)
+    def forward(self, input_ids, attention_mask):
+        trans = self.transformer_model(input_ids, attention_mask)
+        head = self.regression_head(trans.last_hidden_state[:, 0, :])
 
-    model = Model(inputs=[qa, qa_mask], outputs=output_dense)
-    return model
-
+        return head

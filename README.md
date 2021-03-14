@@ -12,11 +12,13 @@ Using DistilBERT to predict color (rgb scale) given its text description
 │  ├─ datasets
 │  │  ├─ __init__.py
 │  │  ├─ colors_dataset.py
+|  |  ├─ dataloaders.py
 │  │  └─ dataset.py
 │  ├─ models
 │  │  ├─ __init__.py
 │  │  ├─ base.py
-│  │  └─ color_model.py
+│  │  ├─ color_model.py
+|  |  └─ early_stopping.py
 │  ├─ networks
 │  │  ├─ __init__.py
 │  │  └─ distilbert.py
@@ -25,40 +27,46 @@ Using DistilBERT to predict color (rgb scale) given its text description
 ├─ data
 │  └─ raw
 │     └─ colors.csv
-├─ notebooks
-│  └─ color_generator.ipynb
 ├─ tasks
+|  ├─ config.json
+|  ├─ predict_color.sh
 │  └─ train_color_predictor.sh
 ├─ training
-│  ├─ run_experiment.py
-│  └─ util.py
+│  └─ run_experiment.py
+├─ weights
+|  └─ ColorModel_ColorsDataset_Distilbert_weights.py
 ├─ .gitattributes
 ├─ .gitignore
 ├─ Pipfile
 ├─ Pipfile.lock
-├─ README.md
-├─ requirements-dev.in
-├─ requirements-dev.txt
-├─ requirements.in
-└─ requirements.txt
+└─ README.md
 ```
 
 ## Setup
 ```zsh
-pip install -r requirements.txt -r requirements-dev.txt
-pipenv lock
+pipenv sync
 ```
+Add flag -d to also sync development packages.
 
 ## Training
  - Load and preprocess data
- - Fine-tune DistilBERT on batch size = 32 for two epochs (keras and transformers)
+ - Fine-tune DistilBERT based on config.json
  - Evaluate on test set
- - Save weights to .h5 (weights folder)
+ - Save weights to .pt (weights folder)
 ```zsh
-PYTHONPATH='.' pipenv run python3 training/run_experiment.py --save '{"dataset": "ColorsDataset", "model": "ColorModel", "network": "distilbert"}'      
+chmod +x tasks/train_color_predictor.sh
+tasks/train_color_predictor.sh \
+    _PATH_TO_JSON_FILE_WITH_EXPERIMENT_CONFIG_
 ```
 
-To modify batch size and number of epochs add train_args
-```
-PYTHONPATH='.' pipenv run python3 training/run_experiment.py --save '{"dataset": "ColorsDataset", "model": "ColorModel", "network": "distilbert", "train_args":{"batch_size": 32,"epochs": 2}}'      
+## Predict
+ - Load model and its weights
+ - Print RGB for specified color name and display its sample
+ - To suppress plotting a sample use --no_plot flag
+ - To predict on GPU use --gpu flag
+``` zsh
+chmod +x tasks/predict_color.sh
+tasks/predict_color.sh \
+    _PATH_TO_JSON_FILE_WITH_EXPERIMENT_CONFIG_ \
+    _COLOR_NAME_
 ```

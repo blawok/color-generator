@@ -1,2 +1,12 @@
-#!/bin/bash
-PYTHONPATH='.' pipenv run python3 training/run_experiment.py --save '{"dataset": "ColorsDataset", "model": "ColorModel", "network": "distilbert"}'
+#!/usr/bin/env bash
+
+if [ $# -lt 1 ]; then
+    echo "Expecting path to training config file."
+    exit 1
+fi
+
+
+export PYTHONPATH=$(pwd)
+pipenv run python training/run_experiment.py $1
+
+

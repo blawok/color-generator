@@ -1,81 +1,75 @@
-from color_generator.datasets.dataset import _download_raw_dataset, Dataset, _parse_args
-from pathlib import Path
-import numpy as np
-
-import tensorflow as tf
-from datasets import load_dataset
+import pandas as pd
+import torch
+from color_generator.datasets.dataset import DefaultDataset, _parse_args
 from transformers import DistilBertTokenizer
 
 
-# RAW_DATA_DIRNAME = Dataset.data_dirname() / "raw" / "colors.csv"
-RAW_DATA_DIRNAME = 'data/raw/colors.csv'
-
-class ColorsDataset(Dataset):
-
-    def __init__(self, test_size=0.15):
+class ColorsDataset(DefaultDataset):
+    def __init__(self, val_size=0.1, test_size=0.15, batch_size=32, num_workers=4):
         self.test_size = test_size
+        self.val_size = val_size
+        self.batch_size = batch_size
+        self.num_workers = num_workers
         self.train = None
         self.test = None
+        self.val = None
+        self._color_names = None
+        self._inputs = None
+        self._targets = None
 
-    def load_or_generate_data(self):
+        self.load_and_generate_data()
+
+    def load_and_generate_data(self):
         """Generate preprocessed data from a file"""
-        self.train, self.test = _load_and_process_colors(self.test_size)
+        self._color_names, self._inputs, self._targets = _load_and_process_colors()
+
+    def __getitem__(self, index):
+        """Get item"""
+        item = dict.fromkeys(self._inputs, {})
+        item["input_ids"] = self._inputs["input_ids"][index]
+        item["attention_mask"] = self._inputs["attention_mask"][index]
+        item["target"] = _norm(self._targets[index])
+
+        return item
+
+    def __len__(self):
+        return len(self._color_names)
 
 
-def _load_and_process_colors(test_size=0.15):
-    """
-    Preprocess dataset file:
-        1. Load Tokenizer from hub
-        2. Tokenize dataset in 1000 (dafault) batches
-        3. Transform into tensorflow tensors
-        4. Extract features
-        5. Transform into tf.data.Dataset
-
-    Returns: tf.data.Dataset
-    """
-    tokenizer = DistilBertTokenizer.from_pretrained('distilbert-base-uncased')
-
-    dataset = load_dataset('csv', data_files=RAW_DATA_DIRNAME)
-    train_test_dataset = dataset['train'].train_test_split(test_size=test_size)
-    encoded_dataset = train_test_dataset.map(lambda examples: tokenizer(examples['name'], max_length=32), batched=True)
-
-    # features
-    encoded_dataset.set_format(type='tensorflow', columns=['input_ids', 'attention_mask'])
-    train_features = {x: encoded_dataset['train'][x].to_tensor(default_value=0, shape=[None, 32]) for x in
-                      ['input_ids', 'attention_mask']}
-    test_features = {x: encoded_dataset['test'][x].to_tensor(default_value=0, shape=[None, 32]) for x in
-                     ['input_ids', 'attention_mask']}
-
-    # labels
-    encoded_dataset.set_format(type='numpy', columns=['red', 'green', 'blue'])
-    train_labels = np.column_stack([_norm(encoded_dataset['train'][:]['red']),
-                                    _norm(encoded_dataset['train'][:]['green']),
-                                    _norm(encoded_dataset['train'][:]['blue'])])
-
-    test_labels = np.column_stack([_norm(encoded_dataset['test'][:]['red']),
-                                   _norm(encoded_dataset['test'][:]['green']),
-                                   _norm(encoded_dataset['test'][:]['blue'])])
-
-    train_tfdataset = tf.data.Dataset.from_tensor_slices((train_features, train_labels
-                                                          )).batch(32)
-
-    test_tfdataset = tf.data.Dataset.from_tensor_slices((test_features, test_labels
-                                                         )).batch(32)
-
-    return train_tfdataset, test_tfdataset
+def _norm(rgb_list):
+    return torch.tensor([value / 255.0 for value in rgb_list])
 
 
-def _norm(value):
-    return value / 255.0
+def _load_and_process_colors():
+    def rgb_to_list(x):
+        return [x["red"], x["green"], x["blue"]]
+
+    path_to_data = ColorsDataset.data_dirname() / "raw/colors.csv"
+    dataset = pd.read_csv(path_to_data)
+
+    names = dataset["name"].tolist()
+    tokenizer = DistilBertTokenizer.from_pretrained("distilbert-base-uncased")
+    tokenized = tokenizer(names, padding=True, return_tensors="pt")
+    rgb = dataset.apply(rgb_to_list, axis=1).tolist()
+
+    return names, tokenized, rgb
 
 
 def main():
-    """Load and preprocess colors datasets and print info."""
-    args = _parse_args()
-    dataset = ColorsDataset()
-    dataset.load_or_generate_data()
+    """
+    Load and preprocess colors.
+    """
 
-    print(dataset)
+    args = _parse_args()
+
+    # dataset
+    dataset = ColorsDataset(
+        test_size=args.test_size,
+        val_size=args.val_size,
+        batch_size=args.batch_size,
+        num_workers=args.num_workers,
+    )
+    dataset.load_and_generate_data()
 
 
 if __name__ == "__main__":
