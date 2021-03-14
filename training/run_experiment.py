@@ -54,7 +54,7 @@ def run_experiment(experiment_config):
     experiment_config["train_args"] = {**experiment_config.get("train_args", {})}
     model.fit(epochs=experiment_config["train_args"]["epochs"])
     print(
-        "Training took {time.strftime('%-d days %-H hours %-M minutes.', time.gmtime(time.time() - t))}"
+        f"Training took {time.strftime('%-d days %-H hours %-M minutes.', time.gmtime(time.time() - t))}"
     )
 
     _, score = model.evaluate(model._dataloaders.test_loader)
