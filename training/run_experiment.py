@@ -1,8 +1,12 @@
-#!/usr/bin/env python
 """Script to run an experiment."""
 import argparse
 import json
 import importlib
+import time
+
+import warnings
+
+warnings.filterwarnings("ignore", category=UserWarning)
 
 
 def run_experiment(experiment_config):
@@ -46,8 +50,12 @@ def run_experiment(experiment_config):
         dataloaders=dataloaders, network_fn=network, device=experiment_config["device"]
     )
 
+    t = time.time()
     experiment_config["train_args"] = {**experiment_config.get("train_args", {})}
     model.fit(epochs=experiment_config["train_args"]["epochs"])
+    print(
+        "Training took {time.strftime('%-d days %-H hours %-M minutes.', time.gmtime(time.time() - t))}"
+    )
 
     _, score = model.evaluate(model._dataloaders.test_loader)
     print(f"Test evaluation (cosine similarity): {score:.5f}")
