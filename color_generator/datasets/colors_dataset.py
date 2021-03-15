@@ -69,7 +69,6 @@ def main():
         batch_size=args.batch_size,
         num_workers=args.num_workers,
     )
-    dataset.load_and_generate_data()
 
 
 if __name__ == "__main__":
