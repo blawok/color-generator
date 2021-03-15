@@ -12,10 +12,9 @@ matplotlib = "*"
 
 [dev-packages]
 ipython = "*"
-black = "*"
+black = "==20.8b1"
+pytest = "*"
 
 [requires]
 python_version = "3.8"
 
-[pipenv]
-allow_prereleases = true
