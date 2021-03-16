@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 import os, random, importlib
-from flask import Flask, request, jsonify, render_template
+from flask import Flask, request, render_template
 from color_generator.color_predictor import ColorPredictor
 from color_generator.datasets import ColorsDataset, DataLoaders
 
@@ -15,13 +15,13 @@ example_colors = ["Ferrari Red",
                   "Kowalski's Hair Color"]
 
 
-@app.route("/")
+@app.route("/test")
 def index():
     """Provide simple health check route."""
     return "It works!"
 
 
-@app.route("/show_color", methods=["GET", "POST"])
+@app.route("/", methods=["GET", "POST"])
 def send_color():
     if request.method == 'POST':
         color_desc = request.form.get('color_desc')
@@ -42,8 +42,6 @@ def send_color():
 def predict(color_desc):
     input_text = color_desc.lower()
     pred = model.predict_color(input_text, plot=False)
-    print(input_text, pred)
-    # pred = [int(x*255) for x in pred[0]]
     return pred
 
 
@@ -73,10 +71,7 @@ def main():
 
 
 if __name__ == "__main__":
-    # datasets_module = importlib.import_module("datasets", package="color_generator")
-    # dataset_class_ = getattr(datasets_module, 'ColorsDataset')
     dataset_class_ = ColorsDataset
-    # dataloader_class_ = getattr(datasets_module, "DataLoaders")
     dataloader_class_ = DataLoaders
 
     dataset_args = {}

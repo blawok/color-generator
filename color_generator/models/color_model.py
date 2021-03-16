@@ -1,11 +1,7 @@
 """ColorModel class."""
-from os import truncate
-from color_generator.datasets.colors_dataset import ColorsDataset
 
 from color_generator.models.base import Model
 
-from color_generator.datasets.dataloaders import DataLoaders
-from color_generator.networks.distilbert import Distilbert
 
 
 from transformers import DistilBertTokenizer
