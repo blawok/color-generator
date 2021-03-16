@@ -6,7 +6,6 @@ from color_generator.color_predictor import ColorPredictor
 from color_generator.datasets import ColorsDataset, DataLoaders
 
 app = Flask(__name__)
-port = int(os.environ.get("PORT", 5000))
 
 example_colors = ["Ferrari Red",
                   "Ugly Yellow",
@@ -67,6 +66,7 @@ def darker_color(pred):
 
 def main():
     """Run the app."""
+    port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port, debug=True)
 
 
