@@ -21,6 +21,7 @@ class ColorPredictor:
             plt.imshow([[rgb_list]], interpolation="none")
             plt.axis("off")
             plt.show()
+        return rgb_list
 
     def evaluate(self):
         """Evaluate on a datasets."""
