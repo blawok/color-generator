@@ -74,7 +74,7 @@ termcolor==1.1.0
 tokenizers==0.10.1
 toml==0.10.2
 torch==1.8.0
-tqdm==4.27
+tqdm==4.59.0
 traitlets==5.0.5
 transformers==4.3.3
 typed-ast==1.4.2

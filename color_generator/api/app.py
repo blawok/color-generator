@@ -13,6 +13,26 @@ example_colors = ["Ferrari Red",
                   "Salmon",
                   "Kowalski's Hair Color"]
 
+dataset_class_ = ColorsDataset
+dataloader_class_ = DataLoaders
+
+dataset_args = {}
+dataset = dataset_class_(**dataset_args)
+dataloaders = dataloader_class_(dataset)
+
+networks_module = importlib.import_module("color_generator.networks")
+network_fn_ = getattr(networks_module, 'Distilbert')
+network_args = {}
+network = network_fn_(**network_args)
+
+models_module = importlib.import_module("color_generator.models")
+model_class_ = getattr(models_module, 'ColorModel')
+
+model = model_class_(
+    dataloaders=dataloaders, network_fn=network, device='cpu'
+)
+model = ColorPredictor(model)
+
 
 @app.route("/test")
 def index():
@@ -71,23 +91,4 @@ def main():
 
 
 if __name__ == "__main__":
-    dataset_class_ = ColorsDataset
-    dataloader_class_ = DataLoaders
-
-    dataset_args = {}
-    dataset = dataset_class_(**dataset_args)
-    dataloaders = dataloader_class_(dataset)
-
-    networks_module = importlib.import_module("color_generator.networks")
-    network_fn_ = getattr(networks_module, 'Distilbert')
-    network_args = {}
-    network = network_fn_(**network_args)
-
-    models_module = importlib.import_module("color_generator.models")
-    model_class_ = getattr(models_module, 'ColorModel')
-
-    model = model_class_(
-        dataloaders=dataloaders, network_fn=network, device='cpu'
-    )
-    model = ColorPredictor(model)
     main()
