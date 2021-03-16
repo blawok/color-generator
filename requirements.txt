@@ -37,7 +37,7 @@ MarkupSafe==1.1.1
 matplotlib==3.3.4
 multiprocess==0.70.10
 mypy-extensions==0.4.3
-numpy==1.20.1
+numpy==1.19.2
 oauthlib==3.1.0
 opt-einsum==3.3.0
 packaging==20.9
@@ -66,10 +66,6 @@ rsa==4.6
 sacremoses==0.0.43
 sentencepiece==0.1.94
 six==1.15.0
-tensorboard==2.3.0
-tensorboard-plugin-wit==1.7.0
-tensorflow==2.4.1
-tensorflow-estimator==2.3.0
 termcolor==1.1.0
 tokenizers==0.10.1
 toml==0.10.2
