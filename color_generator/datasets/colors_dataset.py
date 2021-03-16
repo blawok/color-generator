@@ -1,15 +1,7 @@
-<<<<<<< HEAD:color_generator/preprocessing/colors_dataset.py
-from color_generator.datasets.dataset import _download_raw_dataset, Dataset, _parse_args
-from pathlib import Path
-import numpy as np
 
-import tensorflow as tf
-from datasets import load_dataset
-=======
 import pandas as pd
 import torch
 from color_generator.datasets.dataset import DefaultDataset, _parse_args
->>>>>>> master:color_generator/datasets/colors_dataset.py
 from transformers import DistilBertTokenizer
 
 

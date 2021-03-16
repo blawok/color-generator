@@ -15,12 +15,14 @@ class ColorPredictor:
     def predict_color(self, input_text, plot=True):
         """Predict on a single text."""
         rgb_list = self.model.predict_on_text(input_text)
-        print(f"RGB={rgb_list}")
+        # print(f"RGB={rgb_list}")
         if plot:
             plt.figure(figsize=(2, 2))
             plt.imshow([[rgb_list]], interpolation="none")
             plt.axis("off")
             plt.show()
+
+        return rgb_list
 
     def evaluate(self):
         """Evaluate on a datasets."""
@@ -34,22 +36,22 @@ def _parse_args():
     parser.add_argument(
         "experiment_config",
         type=str,
-        help='Path to experiment JSON like: \'{"dataset": "ColorDataset", "model": "ColorModel", "network": "Distilbert"}\'',
+        help='Path to experiment JSON like: \'{"dataset": "ColorDataset", "model": "ColorModel", "network": "Distilbert"}\''
     )
     parser.add_argument(
         "color",
         type=str,
-        help="Colorname to predict",
+        help="Colorname to predict"
     )
     parser.add_argument(
         "--no_plot",
         action="store_true",
-        help="Whether to plot predicted color",
+        help="Whether to plot predicted color"
     )
     parser.add_argument(
         "--gpu",
         action="store_true",
-        help="Whether to use GPU",
+        help="Whether to use GPU"
     )
     args = parser.parse_args()
 
@@ -71,7 +73,6 @@ def main():
 
     dataset_args = experiment_config.get("dataset_args", {})
     dataset = dataset_class_(**dataset_args)
-
     dataloaders = dataloader_class_(dataset)
 
     networks_module = importlib.import_module("color_generator.networks")

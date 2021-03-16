@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 
-import os, random
+import os, random, importlib
 from flask import Flask, request, jsonify, render_template
-from color_generator.models.color_model import ColorModel
 from color_generator.color_predictor import ColorPredictor
+from color_generator.datasets import ColorsDataset, DataLoaders
 
 app = Flask(__name__)
 port = int(os.environ.get("PORT", 5000))
@@ -41,10 +41,9 @@ def send_color():
 
 def predict(color_desc):
     input_text = color_desc.lower()
-    predictor = ColorPredictor()
-    pred = predictor.predict(input_text)
+    pred = model.predict_color(input_text, plot=False)
     print(input_text, pred)
-    pred = [int(x*255) for x in pred[0]]
+    # pred = [int(x*255) for x in pred[0]]
     return pred
 
 
@@ -68,11 +67,32 @@ def darker_color(pred):
     return color
 
 
-
 def main():
     """Run the app."""
     app.run(host="0.0.0.0", port=port, debug=True)
 
 
 if __name__ == "__main__":
+    # datasets_module = importlib.import_module("datasets", package="color_generator")
+    # dataset_class_ = getattr(datasets_module, 'ColorsDataset')
+    dataset_class_ = ColorsDataset
+    # dataloader_class_ = getattr(datasets_module, "DataLoaders")
+    dataloader_class_ = DataLoaders
+
+    dataset_args = {}
+    dataset = dataset_class_(**dataset_args)
+    dataloaders = dataloader_class_(dataset)
+
+    networks_module = importlib.import_module("color_generator.networks")
+    network_fn_ = getattr(networks_module, 'Distilbert')
+    network_args = {}
+    network = network_fn_(**network_args)
+
+    models_module = importlib.import_module("color_generator.models")
+    model_class_ = getattr(models_module, 'ColorModel')
+
+    model = model_class_(
+        dataloaders=dataloaders, network_fn=network, device='cpu'
+    )
+    model = ColorPredictor(model)
     main()
