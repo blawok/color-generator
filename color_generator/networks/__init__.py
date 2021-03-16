@@ -1,5 +1,3 @@
 """Neural network code modules."""
-from .distilbert import distilbert
-
-
+from .distilbert import Distilbert
 

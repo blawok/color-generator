@@ -4,7 +4,7 @@ from time import time
 from tensorflow.keras.callbacks import EarlyStopping, Callback
 
 
-from color_generator.preprocessing.dataset import Dataset
+from color_generator.datasets.dataset import Dataset
 from color_generator.models.base import Model
 import tensorflow.keras.backend as K
 
