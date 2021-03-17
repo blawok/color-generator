@@ -10,8 +10,12 @@ class Distilbert(nn.Module):
         self.config.output_hidden_states = False
         self.config.output_attentions = False
         self.transformer_model = transformer_model.from_pretrained(
-            "distilbert-base-uncased", config=self.config
+            './saved_model/', config=self.config
         )
+        # self.transformer_model = transformer_model.from_pretrained(
+        #     "distilbert-base-uncased", config=self.config
+        # )
+        # self.transformer_model.save_pretrained(save_directory='./saved_model/')
         self.regression_head = nn.Sequential(
             nn.Linear(in_features=768, out_features=3), nn.ReLU()
         )

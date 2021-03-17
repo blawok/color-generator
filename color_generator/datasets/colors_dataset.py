@@ -50,7 +50,9 @@ def _load_and_process_colors():
     dataset = pd.read_csv(path_to_data)
 
     names = dataset["name"].tolist()
-    tokenizer = DistilBertTokenizer.from_pretrained("distilbert-base-uncased")
+    tokenizer = DistilBertTokenizer.from_pretrained('./saved_model/')
+    # tokenizer = DistilBertTokenizer.from_pretrained("distilbert-base-uncased")
+    # tokenizer.save_pretrained(save_directory='./saved_model/')
     tokenized = tokenizer(names, padding=True, return_tensors="pt")
     rgb = dataset.apply(rgb_to_list, axis=1).tolist()
 

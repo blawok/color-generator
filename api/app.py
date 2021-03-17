@@ -7,31 +7,11 @@ from color_generator.datasets import ColorsDataset, DataLoaders
 
 app = Flask(__name__)
 
-example_colors = ["Ferrari Red",
+EXAMPLE_COLORS = ["Ferrari Red",
                   "Ugly Yellow",
                   "British Racing Green",
                   "Salmon",
                   "Kowalski's Hair Color"]
-
-dataset_class_ = ColorsDataset
-dataloader_class_ = DataLoaders
-
-dataset_args = {}
-dataset = dataset_class_(**dataset_args)
-dataloaders = dataloader_class_(dataset)
-
-networks_module = importlib.import_module("color_generator.networks")
-network_fn_ = getattr(networks_module, 'Distilbert')
-network_args = {}
-network = network_fn_(**network_args)
-
-models_module = importlib.import_module("color_generator.models")
-model_class_ = getattr(models_module, 'ColorModel')
-
-model = model_class_(
-    dataloaders=dataloaders, network_fn=network, device='cpu'
-)
-model = ColorPredictor(model)
 
 
 @app.route("/test")
@@ -65,7 +45,7 @@ def predict(color_desc):
 
 
 def draw_color():
-    example = random.choice(example_colors)
+    example = random.choice(EXAMPLE_COLORS)
     return example
 
 
@@ -91,4 +71,24 @@ def main():
 
 
 if __name__ == "__main__":
+    dataset_class_ = ColorsDataset
+    dataloader_class_ = DataLoaders
+
+    dataset_args = {}
+    dataset = dataset_class_(**dataset_args)
+    dataloaders = dataloader_class_(dataset)
+
+    networks_module = importlib.import_module("color_generator.networks")
+    network_fn_ = getattr(networks_module, 'Distilbert')
+    network_args = {}
+    network = network_fn_(**network_args)
+
+    models_module = importlib.import_module("color_generator.models")
+    model_class_ = getattr(models_module, 'ColorModel')
+
+    model = model_class_(
+        dataloaders=dataloaders, network_fn=network, device='cpu'
+    )
+    model = ColorPredictor(model)
+
     main()

@@ -15,4 +15,4 @@ RUN set -ex && pip3 install -r ./requirements.txt
 # Run the web server
 EXPOSE 5000
 ENV PYTHONPATH /repo
-CMD python3 /repo/color_generator/api/app.py
+CMD python3 /repo/api/app.py

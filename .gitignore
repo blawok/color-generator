@@ -8,9 +8,10 @@ __pycache__/
 # C extensions
 *.so
 
-# Model files
+# Model files / models
 weights/
 *.h5
+saved_model/
 
 # MacOS
 .DS_Store
