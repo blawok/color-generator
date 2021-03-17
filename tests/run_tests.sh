@@ -1,2 +1,2 @@
 export PYTHONPATH=$(pwd)
-pipenv run pytest
+pipenv run pytest -sv
