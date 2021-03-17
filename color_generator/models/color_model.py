@@ -14,7 +14,8 @@ class ColorModel(Model):
         super().__init__(dataloaders, network_fn, device)
 
     def predict_on_text(self, input_text):
-        tokenizer = DistilBertTokenizer.from_pretrained("distilbert-base-uncased")
+        tokenizer = DistilBertTokenizer.from_pretrained("./saved_model/")
+        # tokenizer = DistilBertTokenizer.from_pretrained("distilbert-base-uncased")
         input_text = tokenizer(input_text, truncation=True, return_tensors="pt")
         self.network.eval()
         predictions = self.network(
