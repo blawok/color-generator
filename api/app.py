@@ -5,6 +5,9 @@ from flask import Flask, request, render_template
 from color_generator.color_predictor import ColorPredictor
 from color_generator.datasets import ColorsDataset, DataLoaders
 
+from memory_profiler import profile
+import torch
+
 app = Flask(__name__)
 
 EXAMPLE_COLORS = ["Ferrari Red",
@@ -14,13 +17,16 @@ EXAMPLE_COLORS = ["Ferrari Red",
                   "Kowalski's Hair Color"]
 
 
-@app.route("/test")
+@app.route("/")
 def index():
     """Provide simple health check route."""
-    return "It works!"
+    return """<h1> It works! </h1>
+    <form>
+      <button formaction="./show_color">Now let me invent some colors</button>
+    </form>"""
 
 
-@app.route("/", methods=["GET", "POST"])
+@app.route("/show_color", methods=["GET", "POST"])
 def send_color():
     if request.method == 'POST':
         color_desc = request.form.get('color_desc')
@@ -70,25 +76,32 @@ def main():
     app.run(host="0.0.0.0", port=port, debug=True)
 
 
+@profile
+def load_all():
+    model = torch.load('./model_save_test.pt')
+    # dataset_class_ = ColorsDataset
+    # dataloader_class_ = DataLoaders
+    #
+    # dataset_args = {}
+    # dataset = dataset_class_(**dataset_args)
+    # dataloaders = dataloader_class_(dataset)
+    #
+    # networks_module = importlib.import_module("color_generator.networks")
+    # network_fn_ = getattr(networks_module, 'Distilbert')
+    # network_args = {}
+    # network = network_fn_(**network_args)
+    #
+    # models_module = importlib.import_module("color_generator.models")
+    # model_class_ = getattr(models_module, 'ColorModel')
+    #
+    # model = model_class_(
+    #     dataloaders=dataloaders, network_fn=network, device='cpu'
+    # )
+    # model = ColorPredictor(model)
+    # torch.save(model, './model_save_test.pt')
+    return model
+
+
 if __name__ == "__main__":
-    dataset_class_ = ColorsDataset
-    dataloader_class_ = DataLoaders
-
-    dataset_args = {}
-    dataset = dataset_class_(**dataset_args)
-    dataloaders = dataloader_class_(dataset)
-
-    networks_module = importlib.import_module("color_generator.networks")
-    network_fn_ = getattr(networks_module, 'Distilbert')
-    network_args = {}
-    network = network_fn_(**network_args)
-
-    models_module = importlib.import_module("color_generator.models")
-    model_class_ = getattr(models_module, 'ColorModel')
-
-    model = model_class_(
-        dataloaders=dataloaders, network_fn=network, device='cpu'
-    )
-    model = ColorPredictor(model)
-
+    model = load_all()
     main()

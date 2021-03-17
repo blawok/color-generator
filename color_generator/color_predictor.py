@@ -85,6 +85,7 @@ def main():
     model = model_class_(
         dataloaders=dataloaders, network_fn=network, device=args.device
     )
+
     model = ColorPredictor(model)
 
     model.predict_color(args.color, not args.no_plot)
