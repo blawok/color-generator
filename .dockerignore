@@ -1,10 +1,10 @@
 training
 notebooks
 tasks
-color_generator
+# color_generator
 weights
-data
-saved_model
+# data
+# saved_model
 early_stopping_checkpoint.pt
 *.log
 .md
