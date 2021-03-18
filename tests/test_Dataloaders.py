@@ -2,10 +2,12 @@ import pytest
 from torch import Tensor
 from color_generator.datasets import ColorsDataset, DataLoaders
 
+path_to_dataset = "raw/colors.csv"
+
 
 @pytest.fixture
 def dataloader():
-    return DataLoaders(ColorsDataset())
+    return DataLoaders(ColorsDataset(path=path_to_dataset))
 
 
 def test_train_loader(dataloader):
