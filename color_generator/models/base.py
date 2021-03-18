@@ -27,16 +27,21 @@ class Model:
         p.mkdir(parents=True, exist_ok=True)
         return str(p / f"{self.name}_weights.pt")
 
-    def fit(self, epochs=10):
+    def fit(self, epochs=10, testing=False):
 
         criterion = self.criterion()
         cs = nn.CosineSimilarity(dim=1)
+        train_loader = (
+            self._dataloaders.train_loader
+            if not testing
+            else self._dataloaders._testing_batch
+        )
 
         for epoch in range(epochs):
             self.network.train()
             running_loss = 0.0
             running_cs = 0.0
-            for i, batch in enumerate(self._dataloaders.train_loader):
+            for i, batch in enumerate(train_loader):
                 # forward and backward propagation
                 input_ids = batch["input_ids"].to(self.device)
                 attention_mask = batch["attention_mask"].to(self.device)
@@ -52,13 +57,14 @@ class Model:
                 running_cs += cs(targets, outputs).mean().item()
                 if i > 0 and i % 100 == 0:
                     stats = (
-                        f"Epoch: {epoch+1}/{epochs}, batch: {i}/{len(self._dataloaders.train_loader)}, "
+                        f"Epoch: {epoch+1}/{epochs}, batch: {i}/{len(train_loader)}, "
                         f"train_loss: {running_loss/i:.5f}, train_cosine_similarity: {running_cs/i:.5f}"
                     )
                     print(stats, flush=True)
                     with open("stats.log", "a") as f:
                         print(stats, file=f)
-
+            if testing:
+                continue
             # calculate loss and accuracy on validation dataset
             with torch.no_grad():
                 val_loss, val_cs = self.evaluate(self._dataloaders.valid_loader)
@@ -80,9 +86,12 @@ class Model:
                 print("Early stopping.")
                 break
 
-        self.load_weights(early_stopping_file=self._early_stopping.path)
-        self.save_weights()
-        print("\nFinished training\n")
+        if testing:
+            return running_loss, running_cs
+        else:
+            self.load_weights(early_stopping_file=self._early_stopping.path)
+            self.save_weights()
+            print("\nFinished training\n")
 
     def criterion(self):
         return nn.MSELoss(reduction="mean").to(self.device)
@@ -118,4 +127,3 @@ class Model:
             valid_cs += cos_sim(targets, outputs).mean().item()
 
         return valid_loss / len(dataloader), valid_cs / len(dataloader)
-

@@ -39,6 +39,7 @@ def _parse_args():
     )
     parser.add_argument(
         "color",
+        nargs="+",
         type=str,
         help="Colorname to predict",
     )
@@ -87,7 +88,7 @@ def main():
     )
     model = ColorPredictor(model)
 
-    model.predict_color(args.color, not args.no_plot)
+    model.predict_color(" ".join(args.color), not args.no_plot)
 
 
 if __name__ == "__main__":

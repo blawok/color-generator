@@ -50,11 +50,14 @@ def run_experiment(experiment_config):
         dataloaders=dataloaders, network_fn=network, device=experiment_config["device"]
     )
 
-    t = time.time()
+    t = time.monotonic()
     experiment_config["train_args"] = {**experiment_config.get("train_args", {})}
     model.fit(epochs=experiment_config["train_args"]["epochs"])
+    duration = int(time.monotonic() - t)
     print(
-        f"Training took {time.strftime('%-d days %-H hours %-M minutes.', time.gmtime(time.time() - t))}"
+        f"Training took {duration//86400} days "
+        f"{duration % 86400 // 3600} hours "
+        f"{duration % 86400 % 3600 // 60} minutes."
     )
 
     _, score = model.evaluate(model._dataloaders.test_loader)

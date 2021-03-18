@@ -4,6 +4,7 @@
     "network": "Distilbert",
     "device": "cpu",
     "dataset_args": {
+        "path": "raw/colors.csv",
         "batch_size": 16
     },
     "train_args": {
