@@ -5,7 +5,10 @@ from transformers import DistilBertTokenizer
 
 
 class ColorsDataset(DefaultDataset):
-    def __init__(self, val_size=0.1, test_size=0.15, batch_size=32, num_workers=4):
+    def __init__(
+        self, path, val_size=0.1, test_size=0.15, batch_size=32, num_workers=4
+    ):
+        self.path = path
         self.test_size = test_size
         self.val_size = val_size
         self.batch_size = batch_size
@@ -17,11 +20,11 @@ class ColorsDataset(DefaultDataset):
         self._inputs = None
         self._targets = None
 
-        self.load_and_generate_data()
+        self.load_and_generate_data(self.path)
 
-    def load_and_generate_data(self):
+    def load_and_generate_data(self, path):
         """Generate preprocessed data from a file"""
-        self._color_names, self._inputs, self._targets = _load_and_process_colors()
+        self._color_names, self._inputs, self._targets = _load_and_process_colors(path)
 
     def __getitem__(self, index):
         """Get item"""
@@ -40,11 +43,11 @@ def _norm(rgb_list):
     return torch.tensor([value / 255.0 for value in rgb_list])
 
 
-def _load_and_process_colors():
+def _load_and_process_colors(path):
     def rgb_to_list(x):
         return [x["red"], x["green"], x["blue"]]
 
-    path_to_data = ColorsDataset.data_dirname() / "raw/colors.csv"
+    path_to_data = ColorsDataset.data_dirname() / path
     dataset = pd.read_csv(path_to_data)
 
     names = dataset["name"].tolist()
@@ -64,6 +67,7 @@ def main():
 
     # dataset
     dataset = ColorsDataset(
+        path=args.path,
         test_size=args.test_size,
         val_size=args.val_size,
         batch_size=args.batch_size,
