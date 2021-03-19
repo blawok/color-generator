@@ -3,20 +3,21 @@ from pathlib import Path
 import torch.optim as optim
 import torch.nn as nn
 import torch
+import time
 from .early_stopping import EarlyStopping
+from color_generator.datasets.dataloaders import DataLoaders
 
 
 class Model:
     """Base class, to be subclassed by predictors for specific type of data."""
 
-    def __init__(self, dataloaders, network_fn, device="cpu"):
+    def __init__(self, network_fn, device="cpu"):
 
         self.device = device
-        self._dataloaders = dataloaders
-        self.dataset = self._dataloaders._dataset
         self.network = network_fn.to(self.device)
+        self._dataloaders = None
+        self.name = ""
 
-        self.name = f"{self.__class__.__name__}_{self.dataset.__class__.__name__}_{self.network.__class__.__name__}"
         self._early_stopping = EarlyStopping(
             patience=1, verbose=True, delta=0.001, path="early_stopping_checkpoint.pt"
         )
@@ -27,7 +28,13 @@ class Model:
         p.mkdir(parents=True, exist_ok=True)
         return str(p / f"{self.name}_weights.pt")
 
-    def fit(self, epochs=10, testing=False):
+    def fit(self, dataset, epochs=10, testing=False):
+
+        self._dataloaders = DataLoaders(dataset)
+        self.name = (
+            f"{self.__class__.__name__}_{self._dataloaders._dataset.__class__.__name__}_"
+            f"{self.network.__class__.__name__}_{time.strftime('%Y-%m-%d_%H:%M', time.gmtime())}"
+        )
 
         criterion = self.criterion()
         cs = nn.CosineSimilarity(dim=1)
@@ -89,7 +96,7 @@ class Model:
         if testing:
             return running_loss, running_cs
         else:
-            self.load_weights(early_stopping_file=self._early_stopping.path)
+            self.load_weights(path_to_weights=self._early_stopping.path)
             self.save_weights()
             print("\nFinished training\n")
 
@@ -99,12 +106,8 @@ class Model:
     def optimizer(self):
         return optim.AdamW(self.network.parameters())
 
-    def load_weights(self, early_stopping_file=None):
-        if early_stopping_file:
-            f = early_stopping_file
-        else:
-            f = self.weights_filename
-        self.network.load_state_dict(torch.load(f))
+    def load_weights(self, path_to_weights):
+        self.network.load_state_dict(torch.load(path_to_weights))
 
     def save_weights(self):
         torch.save(self.network.state_dict(), self.weights_filename)

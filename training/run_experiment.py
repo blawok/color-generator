@@ -37,8 +37,6 @@ def run_experiment(experiment_config):
     dataset_args = experiment_config.get("dataset_args", {})
     dataset = dataset_class_(**dataset_args)
 
-    dataloaders = dataloader_class_(dataset)
-
     networks_module = importlib.import_module("color_generator.networks")
     network_fn_ = getattr(networks_module, experiment_config["network"])
     network_args = experiment_config.get("network_args", {})
@@ -46,13 +44,11 @@ def run_experiment(experiment_config):
 
     models_module = importlib.import_module("color_generator.models")
     model_class_ = getattr(models_module, experiment_config["model"])
-    model = model_class_(
-        dataloaders=dataloaders, network_fn=network, device=experiment_config["device"]
-    )
+    model = model_class_(network_fn=network, device=experiment_config["device"])
 
     t = time.monotonic()
     experiment_config["train_args"] = {**experiment_config.get("train_args", {})}
-    model.fit(epochs=experiment_config["train_args"]["epochs"])
+    model.fit(dataset=dataset, epochs=experiment_config["train_args"]["epochs"])
     duration = int(time.monotonic() - t)
     print(
         f"Training took {duration//86400} days "
