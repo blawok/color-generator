@@ -30,7 +30,13 @@ Using DistilBERT to predict color (rgb scale) given its text description
 ├─ tasks
 |  ├─ config.json
 |  ├─ predict_color.sh
+|  ├─ run_tests.sh
 │  └─ train_color_predictor.sh
+├─ tests
+|  ├─ test_ColorModel.py
+|  ├─ test_ColorsDataset.py
+|  ├─ test_Dataloaders.py
+|  └─ test_Distilbert.py
 ├─ training
 │  └─ run_experiment.py
 ├─ weights
@@ -68,5 +74,6 @@ tasks/train_color_predictor.sh \
 chmod +x tasks/predict_color.sh
 tasks/predict_color.sh \
     _PATH_TO_JSON_FILE_WITH_EXPERIMENT_CONFIG_ \
+    _PATH_TO_FILE_WITH_MODEL_WEIGHTS_ \
     _COLOR_NAME_
 ```
