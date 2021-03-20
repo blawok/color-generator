@@ -1,26 +1,25 @@
 """Model class, to be extended by specific types of models."""
 from pathlib import Path
-import torch.optim as optim
 import torch.nn as nn
 import torch
 import time
 from .early_stopping import EarlyStopping
 from color_generator.datasets.dataloaders import DataLoaders
+from importlib import import_module
 
 
 class Model:
     """Base class, to be subclassed by predictors for specific type of data."""
 
-    def __init__(self, network_fn, device="cpu"):
+    def __init__(self, network_fn, device="cpu", **kwargs):
 
         self.device = device
         self.network = network_fn.to(self.device)
         self._dataloaders = None
         self.name = ""
+        self.kwargs = kwargs
 
-        self._early_stopping = EarlyStopping(
-            patience=1, verbose=True, delta=0.001, path="early_stopping_checkpoint.pt"
-        )
+        self._early_stopping = EarlyStopping(**self.kwargs.get("early_stopping", {}))
 
     @property
     def weights_filename(self):
@@ -100,11 +99,33 @@ class Model:
             self.save_weights()
             print("\nFinished training\n")
 
+    def parametrize(self, obj, def_obj, def_params):
+        try:
+            kwargs = self.kwargs[obj]
+            string_obj = kwargs.get("object", def_obj)
+            module_path, class_name = string_obj.rsplit(".", 1)
+            module = import_module(module_path)
+            obj = getattr(module, class_name)
+            params = kwargs.get("params", {})
+        except KeyError:
+            module_path, class_name = def_obj.rsplit(".", 1)
+            module = import_module(module_path)
+            obj = getattr(module, class_name)
+            params = def_params
+        finally:
+            return obj, params
+
     def criterion(self):
-        return nn.MSELoss(reduction="mean").to(self.device)
+        criterion, params = self.parametrize(
+            "criterion", "torch.nn.MSELoss", {"reduction": "mean"}
+        )
+        return criterion(**params).to(self.device)
 
     def optimizer(self):
-        return optim.AdamW(self.network.parameters())
+        optimizer, params = self.parametrize(
+            "optimizer", "torch.optim.AdamW", {"lr": 3e-4}
+        )
+        return optimizer(self.network.parameters(), **params)
 
     def load_weights(self, path_to_weights):
         self.network.load_state_dict(torch.load(path_to_weights))

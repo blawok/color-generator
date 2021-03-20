@@ -6,7 +6,7 @@ class EarlyStopping:
     """Early stops the training if validation loss doesn't improve after a given patience."""
 
     def __init__(
-        self, patience=1, verbose=True, delta=0, path="early_stopping_checkpoint.pt"
+        self, patience=3, verbose=True, delta=0, path="early_stopping_checkpoint.pt"
     ):
         """
         Args:
