@@ -44,7 +44,9 @@ def run_experiment(experiment_config):
 
     models_module = importlib.import_module("color_generator.models")
     model_class_ = getattr(models_module, experiment_config["model"])
-    model = model_class_(network_fn=network, device=experiment_config["device"])
+    model = model_class_(
+        network, experiment_config["device"], **experiment_config["train_args"]
+    )
 
     t = time.monotonic()
     experiment_config["train_args"] = {**experiment_config.get("train_args", {})}

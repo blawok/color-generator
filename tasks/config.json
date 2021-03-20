@@ -8,6 +8,24 @@
         "batch_size": 16
     },
     "train_args": {
-        "epochs": 5
+        "epochs": 10,
+        "early_stopping": {
+            "patience": 3,
+            "verbose": true,
+            "delta": 1e-3
+        },
+        "criterion": {
+            "object": "torch.nn.MSELoss",
+            "params": {
+                "reduction": "mean"
+            }
+        },
+        "optimizer": {
+            "object": "torch.optim.AdamW",
+            "params": {
+                "lr": 3e-4,
+                "weight_decay": 0.01
+            }
+        }
     }
 }
