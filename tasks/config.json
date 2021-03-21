@@ -7,8 +7,11 @@
         "path": "raw/colors.csv",
         "batch_size": 16
     },
+    "network_args": {
+        "freeze": true
+    },
     "train_args": {
-        "epochs": 10,
+        "epochs": 25,
         "early_stopping": {
             "patience": 3,
             "verbose": true,

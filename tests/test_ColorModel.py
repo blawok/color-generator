@@ -18,9 +18,7 @@ def model():
 
 
 def test_fit_evaluate(model):
-    loss, cos_sim = model.fit(
-        ColorsDataset(path=path_to_dataset), epochs=50, testing=True
-    )
+    loss, cos_sim = model.fit(ColorsDataset(path=path_to_dataset), testing=True)
     _, cos_sim = model.evaluate(model._dataloaders.test_loader)
     assert loss < 0.1
     assert cos_sim > 0.9

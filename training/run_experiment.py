@@ -22,35 +22,32 @@ def run_experiment(experiment_config):
             "model": "ColorModel",
             "network": "Distilbert",
             "train_args": {
-                "batch_size": 32,
                 "epochs": 2
             }
         }
     """
     print(f"Running experiment with config {experiment_config}")
 
+    # dataset
     datasets_module = importlib.import_module("color_generator.datasets")
-
     dataset_class_ = getattr(datasets_module, experiment_config["dataset"])
-    dataloader_class_ = getattr(datasets_module, "DataLoaders")
-
     dataset_args = experiment_config.get("dataset_args", {})
     dataset = dataset_class_(**dataset_args)
 
+    # network
     networks_module = importlib.import_module("color_generator.networks")
-    network_fn_ = getattr(networks_module, experiment_config["network"])
+    network_class_ = getattr(networks_module, experiment_config["network"])
     network_args = experiment_config.get("network_args", {})
-    network = network_fn_(**network_args)
+    network = network_class_(**network_args)
 
+    # model
     models_module = importlib.import_module("color_generator.models")
     model_class_ = getattr(models_module, experiment_config["model"])
-    model = model_class_(
-        network, experiment_config["device"], **experiment_config["train_args"]
-    )
+    model_args = experiment_config.get("train_args", {})
+    model = model_class_(network, experiment_config["device"], **model_args)
 
     t = time.monotonic()
-    experiment_config["train_args"] = {**experiment_config.get("train_args", {})}
-    model.fit(dataset=dataset, epochs=experiment_config["train_args"]["epochs"])
+    model.fit(dataset=dataset)
     duration = int(time.monotonic() - t)
     print(
         f"Training took {duration//86400} days "

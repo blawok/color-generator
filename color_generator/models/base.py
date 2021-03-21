@@ -27,7 +27,15 @@ class Model:
         p.mkdir(parents=True, exist_ok=True)
         return str(p / f"{self.name}_weights.pt")
 
-    def fit(self, dataset, epochs=10, testing=False):
+    def fit(self, dataset, testing=False):
+
+        if not testing:
+            try:
+                epochs = self.kwargs["epochs"]
+            except KeyError:
+                epochs = 20
+        else:
+            epochs = 50
 
         self._dataloaders = DataLoaders(dataset)
         self.name = (
