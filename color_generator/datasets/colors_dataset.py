@@ -1,18 +1,25 @@
 import pandas as pd
 import torch
 from color_generator.datasets.dataset import DefaultDataset, _parse_args
-from transformers import DistilBertTokenizer
+from transformers import AutoTokenizer
 
 
 class ColorsDataset(DefaultDataset):
     def __init__(
-        self, path, val_size=0.1, test_size=0.15, batch_size=32, num_workers=4
+        self,
+        path,
+        val_size=0.1,
+        test_size=0.15,
+        batch_size=32,
+        num_workers=4,
+        architecture="distilbert-base-uncased",
     ):
         self.path = path
         self.test_size = test_size
         self.val_size = val_size
         self.batch_size = batch_size
         self.num_workers = num_workers
+        self.architecture = architecture
         self.train = None
         self.test = None
         self.val = None
@@ -20,11 +27,13 @@ class ColorsDataset(DefaultDataset):
         self._inputs = None
         self._targets = None
 
-        self.load_and_generate_data(self.path)
+        self.load_and_generate_data()
 
-    def load_and_generate_data(self, path):
+    def load_and_generate_data(self):
         """Generate preprocessed data from a file"""
-        self._color_names, self._inputs, self._targets = _load_and_process_colors(path)
+        self._color_names, self._inputs, self._targets = _load_and_process_colors(
+            self.path, self.architecture
+        )
 
     def __getitem__(self, index):
         """Get item"""
@@ -43,7 +52,7 @@ def _norm(rgb_list):
     return torch.tensor([value / 255.0 for value in rgb_list])
 
 
-def _load_and_process_colors(path):
+def _load_and_process_colors(path, architecture):
     def rgb_to_list(x):
         return [x["red"], x["green"], x["blue"]]
 
@@ -51,7 +60,7 @@ def _load_and_process_colors(path):
     dataset = pd.read_csv(path_to_data)
 
     names = dataset["name"].tolist()
-    tokenizer = DistilBertTokenizer.from_pretrained("distilbert-base-uncased")
+    tokenizer = AutoTokenizer.from_pretrained(architecture, use_fast=False)
     tokenized = tokenizer(names, padding=True, return_tensors="pt")
     rgb = dataset.apply(rgb_to_list, axis=1).tolist()
 
