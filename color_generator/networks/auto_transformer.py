@@ -1,9 +1,15 @@
+from importlib import import_module
 import torch.nn as nn
 from transformers import AutoModel, AutoConfig
 
 
 class AutoTransformer(nn.Module):
-    def __init__(self, architecture="distilbert-base-uncased", freeze=True):
+    def __init__(
+        self,
+        architecture="distilbert-base-uncased",
+        freeze=True,
+        activation="torch.nn.ReLU",
+    ):
         super().__init__()
 
         self.architecture = architecture
@@ -18,9 +24,13 @@ class AutoTransformer(nn.Module):
             -1
         ].output_layer_norm.normalized_shape[0]
 
+        module_path, class_name = activation.rsplit(".", 1)
+        module = import_module(module_path)
+        _activation = getattr(module, class_name)()
+
         self.regression_head = nn.Sequential(
             nn.Linear(in_features=self.transformer_output_features, out_features=3),
-            nn.ReLU(),
+            _activation,
         )
 
         if freeze:

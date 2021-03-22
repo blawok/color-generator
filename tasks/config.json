@@ -5,7 +5,8 @@
         "name": "AutoTransformer",
         "args": {
             "architecture": "distilbert-base-uncased",
-            "freeze": true
+            "freeze": true,
+            "activation": "torch.nn.ReLU"
         }
     },
     "device": "cpu",
