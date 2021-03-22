@@ -1,11 +1,11 @@
 import pytest
 import torch
-from color_generator.networks import Distilbert
+from color_generator.networks import AnyBertNetwork
 
 
 @pytest.fixture
 def network():
-    return Distilbert()
+    return AnyBertNetwork()
 
 
 def test_output_shape(network):

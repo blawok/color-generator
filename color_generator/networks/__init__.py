@@ -1,3 +1,2 @@
 """Neural network code modules."""
-from .distilbert import Distilbert
-
+from .bert_network import AnyBertNetwork
