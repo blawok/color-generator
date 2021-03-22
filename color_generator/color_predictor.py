@@ -64,9 +64,9 @@ def main():
     experiment_config = json.loads(config)
 
     networks_module = importlib.import_module("color_generator.networks")
-    network_fn_ = getattr(networks_module, experiment_config["network"])
-    network_args = experiment_config.get("network_args", {})
-    network = network_fn_(**network_args)
+    network_class_ = getattr(networks_module, experiment_config["network"]["name"])
+    network_args = experiment_config["network"].get("network_args", {})
+    network = network_class_(**network_args)
 
     models_module = importlib.import_module("color_generator.models")
     model_class_ = getattr(models_module, experiment_config["model"])

@@ -40,7 +40,7 @@ class Model:
         self._dataloaders = DataLoaders(dataset)
         self.name = (
             f"{self.__class__.__name__}_{self._dataloaders._dataset.__class__.__name__}_"
-            f"{self.network.__class__.__name__}_{time.strftime('%Y-%m-%d_%H:%M', time.gmtime())}"
+            f"{self.network.architecture}_{time.strftime('%Y-%m-%d_%H:%M', time.gmtime())}"
         )
 
         criterion = self.criterion()
@@ -105,7 +105,7 @@ class Model:
         else:
             self.load_weights(path_to_weights=self._early_stopping.path)
             self.save_weights()
-            print("\nFinished training\n")
+            print("\nFinished training")
 
     def parametrize(self, obj, def_obj, def_params):
         try:

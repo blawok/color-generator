@@ -3,7 +3,7 @@ import torch
 import torch.nn as nn
 import torch.optim as optim
 from color_generator.datasets import ColorsDataset
-from color_generator.networks import Distilbert
+from color_generator.networks import AnyBertNetwork
 from color_generator.models import ColorModel
 
 path_to_dataset = "raw/colors.csv"
@@ -12,7 +12,7 @@ path_to_dataset = "raw/colors.csv"
 @pytest.fixture
 def model():
     torch.manual_seed(2137)
-    network = Distilbert()
+    network = AnyBertNetwork()
     model = ColorModel(network, "cpu")
     return model
 
