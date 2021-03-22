@@ -2,7 +2,7 @@
     "dataset": "ColorsDataset",
     "model": "ColorModel",
     "network": {
-        "name": "AnyBertNetwork",
+        "name": "AutoTransformer",
         "args": {
             "architecture": "distilbert-base-uncased",
             "freeze": true

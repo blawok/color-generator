@@ -2,7 +2,7 @@ import torch.nn as nn
 from transformers import AutoModel, AutoConfig
 
 
-class AnyBertNetwork(nn.Module):
+class AutoTransformer(nn.Module):
     def __init__(self, architecture="distilbert-base-uncased", freeze=True):
         super().__init__()
 

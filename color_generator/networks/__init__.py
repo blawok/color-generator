@@ -1,2 +1,2 @@
 """Neural network code modules."""
-from .bert_network import AnyBertNetwork
+from .auto_transformer import AutoTransformer
