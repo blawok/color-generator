@@ -1,14 +1,17 @@
 {
     "dataset": "ColorsDataset",
     "model": "ColorModel",
-    "network": "Distilbert",
+    "network": {
+        "name": "AnyBertNetwork",
+        "args": {
+            "architecture": "distilbert-base-uncased",
+            "freeze": true
+        }
+    },
     "device": "cpu",
     "dataset_args": {
         "path": "raw/colors.csv",
         "batch_size": 16
-    },
-    "network_args": {
-        "freeze": true
     },
     "train_args": {
         "epochs": 25,

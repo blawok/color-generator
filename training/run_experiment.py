@@ -20,7 +20,12 @@ def run_experiment(experiment_config):
         {
             "datasets": "ColorsDataset",
             "model": "ColorModel",
-            "network": "Distilbert",
+            "network": {
+                "args": {
+                    "architecture": "distilbert-base-uncased",
+                    "freeze": true
+                }
+            },
             "train_args": {
                 "epochs": 2
             }
@@ -32,12 +37,17 @@ def run_experiment(experiment_config):
     datasets_module = importlib.import_module("color_generator.datasets")
     dataset_class_ = getattr(datasets_module, experiment_config["dataset"])
     dataset_args = experiment_config.get("dataset_args", {})
+    try:
+        architecture = experiment_config["network"]["args"]["architecture"]
+        dataset_args["architecture"] = architecture
+    except KeyError:
+        pass
     dataset = dataset_class_(**dataset_args)
 
     # network
     networks_module = importlib.import_module("color_generator.networks")
-    network_class_ = getattr(networks_module, experiment_config["network"])
-    network_args = experiment_config.get("network_args", {})
+    network_class_ = getattr(networks_module, experiment_config["network"]["name"])
+    network_args = experiment_config["network"].get("args", {})
     network = network_class_(**network_args)
 
     # model
@@ -52,7 +62,7 @@ def run_experiment(experiment_config):
     print(
         f"Training took {duration//86400} days "
         f"{duration % 86400 // 3600} hours "
-        f"{duration % 86400 % 3600 // 60} minutes."
+        f"{duration % 86400 % 3600 // 60} minutes.\n"
     )
 
     _, score = model.evaluate(model._dataloaders.test_loader)
