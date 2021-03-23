@@ -1,11 +1,11 @@
 import pytest
 import torch
-from color_generator.networks import Distilbert
+from color_generator.networks import AutoTransformer
 
 
 @pytest.fixture
 def network():
-    return Distilbert()
+    return AutoTransformer()
 
 
 def test_output_shape(network):

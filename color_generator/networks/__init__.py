@@ -1,3 +1,2 @@
 """Neural network code modules."""
-from .distilbert import Distilbert
-
+from .auto_transformer import AutoTransformer
