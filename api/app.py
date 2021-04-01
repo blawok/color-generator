@@ -17,16 +17,16 @@ EXAMPLE_COLORS = ["Ferrari Red",
                   "Kowalski's Hair Color"]
 
 
-@app.route("/")
+@app.route("/test")
 def index():
     """Provide simple health check route."""
     return """<h1> It works! </h1>
     <form>
-      <button formaction="./show_color">Now let me invent some colors</button>
+      <button formaction="./">Now let me invent some colors</button>
     </form>"""
 
 
-@app.route("/show_color", methods=["GET", "POST"])
+@app.route("/", methods=["GET", "POST"])
 def send_color():
     if request.method == 'POST':
         color_desc = request.form.get('color_desc')
