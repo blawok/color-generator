@@ -2,15 +2,25 @@
 import pandas as pd
 import torch
 from color_generator.datasets.dataset import DefaultDataset, _parse_args
-from transformers import DistilBertTokenizer
+from transformers import AutoTokenizer
 
 
 class ColorsDataset(DefaultDataset):
-    def __init__(self, val_size=0.1, test_size=0.15, batch_size=32, num_workers=4):
+    def __init__(
+        self,
+        path,
+        val_size=0.1,
+        test_size=0.15,
+        batch_size=32,
+        num_workers=4,
+        architecture="distilbert-base-uncased",
+    ):
+        self.path = path
         self.test_size = test_size
         self.val_size = val_size
         self.batch_size = batch_size
         self.num_workers = num_workers
+        self.architecture = architecture
         self.train = None
         self.test = None
         self.val = None
@@ -22,7 +32,9 @@ class ColorsDataset(DefaultDataset):
 
     def load_and_generate_data(self):
         """Generate preprocessed data from a file"""
-        self._color_names, self._inputs, self._targets = _load_and_process_colors()
+        self._color_names, self._inputs, self._targets = _load_and_process_colors(
+            self.path, self.architecture
+        )
 
 
     def __getitem__(self, index):
@@ -42,17 +54,15 @@ def _norm(rgb_list):
     return torch.tensor([value / 255.0 for value in rgb_list])
 
 
-def _load_and_process_colors():
+def _load_and_process_colors(path, architecture):
     def rgb_to_list(x):
         return [x["red"], x["green"], x["blue"]]
 
-    path_to_data = ColorsDataset.data_dirname() / "raw/colors.csv"
+    path_to_data = ColorsDataset.data_dirname() / path
     dataset = pd.read_csv(path_to_data)
 
     names = dataset["name"].tolist()
-    tokenizer = DistilBertTokenizer.from_pretrained('./saved_model/')
-    # tokenizer = DistilBertTokenizer.from_pretrained("distilbert-base-uncased")
-    # tokenizer.save_pretrained(save_directory='./saved_model/')
+    tokenizer = AutoTokenizer.from_pretrained(architecture, use_fast=False)
     tokenized = tokenizer(names, padding=True, return_tensors="pt")
     rgb = dataset.apply(rgb_to_list, axis=1).tolist()
 
@@ -68,12 +78,12 @@ def main():
 
     # dataset
     dataset = ColorsDataset(
+        path=args.path,
         test_size=args.test_size,
         val_size=args.val_size,
         batch_size=args.batch_size,
         num_workers=args.num_workers,
     )
-    dataset.load_and_generate_data()
 
 
 if __name__ == "__main__":

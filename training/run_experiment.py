@@ -20,42 +20,49 @@ def run_experiment(experiment_config):
         {
             "datasets": "ColorsDataset",
             "model": "ColorModel",
-            "network": "Distilbert",
+            "network": {
+                "args": {
+                    "architecture": "distilbert-base-uncased",
+                    "freeze": true
+                }
+            },
             "train_args": {
-                "batch_size": 32,
                 "epochs": 2
             }
         }
     """
     print(f"Running experiment with config {experiment_config}")
 
-
+    # dataset
     datasets_module = importlib.import_module("color_generator.datasets")
-
     dataset_class_ = getattr(datasets_module, experiment_config["dataset"])
-    dataloader_class_ = getattr(datasets_module, "DataLoaders")
-
     dataset_args = experiment_config.get("dataset_args", {})
+    try:
+        architecture = experiment_config["network"]["args"]["architecture"]
+        dataset_args["architecture"] = architecture
+    except KeyError:
+        pass
     dataset = dataset_class_(**dataset_args)
 
-    dataloaders = dataloader_class_(dataset)
-
+    # network
     networks_module = importlib.import_module("color_generator.networks")
-    network_fn_ = getattr(networks_module, experiment_config["network"])
-    network_args = experiment_config.get("network_args", {})
-    network = network_fn_(**network_args)
+    network_class_ = getattr(networks_module, experiment_config["network"]["name"])
+    network_args = experiment_config["network"].get("args", {})
+    network = network_class_(**network_args)
 
+    # model
     models_module = importlib.import_module("color_generator.models")
     model_class_ = getattr(models_module, experiment_config["model"])
-    model = model_class_(
-        dataloaders=dataloaders, network_fn=network, device=experiment_config["device"]
-    )
+    model_args = experiment_config.get("train_args", {})
+    model = model_class_(network, experiment_config["device"], **model_args)
 
-    t = time.time()
-    experiment_config["train_args"] = {**experiment_config.get("train_args", {})}
-    model.fit(epochs=experiment_config["train_args"]["epochs"])
+    t = time.monotonic()
+    model.fit(dataset=dataset)
+    duration = int(time.monotonic() - t)
     print(
-        f"Training took {time.strftime('%-d days %-H hours %-M minutes.', time.gmtime(time.time() - t))}"
+        f"Training took {duration//86400} days "
+        f"{duration % 86400 // 3600} hours "
+        f"{duration % 86400 % 3600 // 60} minutes.\n"
     )
 
     _, score = model.evaluate(model._dataloaders.test_loader)

@@ -1,25 +1,25 @@
 """Model class, to be extended by specific types of models."""
 from pathlib import Path
-import torch.optim as optim
 import torch.nn as nn
 import torch
+import time
 from .early_stopping import EarlyStopping
+from color_generator.datasets.dataloaders import DataLoaders
+from importlib import import_module
 
 
 class Model:
     """Base class, to be subclassed by predictors for specific type of data."""
 
-    def __init__(self, dataloaders, network_fn, device="cpu"):
+    def __init__(self, network_fn, device="cpu", **kwargs):
 
         self.device = device
-        self._dataloaders = dataloaders
-        self.dataset = self._dataloaders._dataset
         self.network = network_fn.to(self.device)
+        self._dataloaders = None
+        self.name = ""
+        self.kwargs = kwargs
 
-        self.name = f"{self.__class__.__name__}_{self.dataset.__class__.__name__}_{self.network.__class__.__name__}"
-        self._early_stopping = EarlyStopping(
-            patience=1, verbose=True, delta=0.001, path="early_stopping_checkpoint.pt"
-        )
+        self._early_stopping = EarlyStopping(**self.kwargs.get("early_stopping", {}))
 
 
     @property
@@ -28,16 +28,35 @@ class Model:
         p.mkdir(parents=True, exist_ok=True)
         return str(p / f"{self.name}_weights.pt")
 
-    def fit(self, epochs=10):
+    def fit(self, dataset, testing=False):
+
+        if not testing:
+            try:
+                epochs = self.kwargs["epochs"]
+            except KeyError:
+                epochs = 20
+        else:
+            epochs = 50
+
+        self._dataloaders = DataLoaders(dataset)
+        self.name = (
+            f"{self.__class__.__name__}_{self._dataloaders._dataset.__class__.__name__}_"
+            f"{self.network.architecture}_{time.strftime('%Y-%m-%d_%H:%M', time.gmtime())}"
+        )
 
         criterion = self.criterion()
         cs = nn.CosineSimilarity(dim=1)
+        train_loader = (
+            self._dataloaders.train_loader
+            if not testing
+            else self._dataloaders._testing_batch
+        )
 
         for epoch in range(epochs):
             self.network.train()
             running_loss = 0.0
             running_cs = 0.0
-            for i, batch in enumerate(self._dataloaders.train_loader):
+            for i, batch in enumerate(train_loader):
                 # forward and backward propagation
                 input_ids = batch["input_ids"].to(self.device)
                 attention_mask = batch["attention_mask"].to(self.device)
@@ -53,13 +72,14 @@ class Model:
                 running_cs += cs(targets, outputs).mean().item()
                 if i > 0 and i % 100 == 0:
                     stats = (
-                        f"Epoch: {epoch+1}/{epochs}, batch: {i}/{len(self._dataloaders.train_loader)}, "
+                        f"Epoch: {epoch+1}/{epochs}, batch: {i}/{len(train_loader)}, "
                         f"train_loss: {running_loss/i:.5f}, train_cosine_similarity: {running_cs/i:.5f}"
                     )
                     print(stats, flush=True)
                     with open("stats.log", "a") as f:
                         print(stats, file=f)
-
+            if testing:
+                continue
             # calculate loss and accuracy on validation dataset
             with torch.no_grad():
                 val_loss, val_cs = self.evaluate(self._dataloaders.valid_loader)
@@ -81,22 +101,43 @@ class Model:
                 print("Early stopping.")
                 break
 
-        self.load_weights(early_stopping_file=self._early_stopping.path)
-        self.save_weights()
-        print("\nFinished training\n")
+        if testing:
+            return running_loss, running_cs
+        else:
+            self.load_weights(path_to_weights=self._early_stopping.path)
+            self.save_weights()
+            print("\nFinished training")
+
+    def parametrize(self, obj, def_obj, def_params):
+        try:
+            kwargs = self.kwargs[obj]
+            string_obj = kwargs.get("object", def_obj)
+            module_path, class_name = string_obj.rsplit(".", 1)
+            module = import_module(module_path)
+            obj = getattr(module, class_name)
+            params = kwargs.get("params", {})
+        except KeyError:
+            module_path, class_name = def_obj.rsplit(".", 1)
+            module = import_module(module_path)
+            obj = getattr(module, class_name)
+            params = def_params
+        finally:
+            return obj, params
 
     def criterion(self):
-        return nn.MSELoss(reduction="mean").to(self.device)
+        criterion, params = self.parametrize(
+            "criterion", "torch.nn.MSELoss", {"reduction": "mean"}
+        )
+        return criterion(**params).to(self.device)
 
     def optimizer(self):
-        return optim.AdamW(self.network.parameters())
+        optimizer, params = self.parametrize(
+            "optimizer", "torch.optim.AdamW", {"lr": 3e-4}
+        )
+        return optimizer(self.network.parameters(), **params)
 
-    def load_weights(self, early_stopping_file=None):
-        if early_stopping_file:
-            f = early_stopping_file
-        else:
-            f = self.weights_filename
-        self.network.load_state_dict(torch.load(f))
+    def load_weights(self, path_to_weights):
+        self.network.load_state_dict(torch.load(path_to_weights))
 
 
     def save_weights(self):
@@ -120,4 +161,3 @@ class Model:
             valid_cs += cos_sim(targets, outputs).mean().item()
 
         return valid_loss / len(dataloader), valid_cs / len(dataloader)
-

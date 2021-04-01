@@ -18,6 +18,12 @@ class DefaultDataset(Dataset):
 def _parse_args():
     parser = argparse.ArgumentParser()
     parser.add_argument(
+        "--path",
+        type=str,
+        default="raw/colors.csv",
+        help="Path to data within data directory.",
+    )
+    parser.add_argument(
         "--test_size",
         type=float,
         default=0.15,

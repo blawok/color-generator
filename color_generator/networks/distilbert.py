@@ -12,10 +12,6 @@ class Distilbert(nn.Module):
         self.transformer_model = transformer_model.from_pretrained(
             './saved_model/', config=self.config
         )
-        # self.transformer_model = transformer_model.from_pretrained(
-        #     "distilbert-base-uncased", config=self.config
-        # )
-        # self.transformer_model.save_pretrained(save_directory='./saved_model/')
         self.regression_head = nn.Sequential(
             nn.Linear(in_features=768, out_features=3), nn.ReLU()
         )
@@ -24,10 +20,8 @@ class Distilbert(nn.Module):
             for param in self.transformer_model.parameters():
                 param.requires_grad = False
 
-
     def forward(self, input_ids, attention_mask):
         trans = self.transformer_model(input_ids, attention_mask)
         head = self.regression_head(trans.last_hidden_state[:, 0, :])
-
 
         return head

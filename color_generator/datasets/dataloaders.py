@@ -1,4 +1,5 @@
 import numpy as np
+import torch
 from torch.utils.data import DataLoader, Subset
 from torch.utils.data.sampler import SubsetRandomSampler
 
@@ -20,10 +21,12 @@ class DataLoaders:
         self.train_loader = None
         self.valid_loader = None
         self.test_loader = None
+        self._testing_batch = None
 
         self._split_indices()
         self._split_dataset()
         self._make_dataloaders()
+        self._prepare_testing_batch()
 
     def _split_indices(self):
         # randomly split to train, valid and test set
@@ -81,3 +84,12 @@ class DataLoaders:
         )
 
         return self.train_loader, self.valid_loader, self.test_loader
+
+    def _prepare_testing_batch(self):
+        # preparing small deterministic batch for model testing
+        self._testing_batch = DataLoader(
+            dataset=Subset(self.train_dataset, torch.arange(0, 16)),
+            batch_size=16,
+            shuffle=False,
+            num_workers=self.num_workers,
+        )
